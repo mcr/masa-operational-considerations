@@ -1,0 +1,15 @@
+dist: trusty
+sudo: false
+language: python
+python:
+  - "3.6"
+
+before_install:
+  - "pip install xml2rfc pyang"
+  - "gem install kramdown-rfc2629"
+  - "export PATH=$HOME/.local/bin:$PATH."
+
+install:
+  - "./install-pyang-sid-work"
+
+script: "make"

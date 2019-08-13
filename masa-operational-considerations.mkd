@@ -1,0 +1,69 @@
+---
+title: Operational Considerations for Manufacturer Authorized Signing Authority
+abbrev: MASA Considerations
+docname: draft-richardson-anima-masa-considerations-00
+
+# stand_alone: true
+
+ipr: trust200902
+area: Internet
+wg: anima Working Group
+kw: Internet-Draft
+cat: std
+
+coding: us-ascii
+pi:    # can use array (if all yes) or hash here
+  toc: yes
+  sortrefs:   # defaults to yes
+  symrefs: yes
+
+author:
+
+
+- ins: M. Richardson
+  name: Michael Richardson
+  org: Sandelman Software Works
+  email: mcr+ietf@sandelman.ca
+
+normative:
+  BCP14: RFC8174
+  I-D.ietf-anima-bootstrapping-keyinfra:
+
+informative:
+  RFC7030:
+
+--- abstract
+
+This document describes a number of operational modes that a
+BRSKI Manufacturer Authorized Signing Authority (MASA) may take on.
+
+Each mode is defined, and then each mode is given a relevance
+within an over applicability of what kind of organization the
+MASA is deployed into.  This document does not change any
+protocol mechanisms.
+
+--- middle
+
+# Introduction
+
+XXX
+
+# Privacy Considerations
+
+YYY
+
+# Security Considerations
+
+ZZZ
+
+# IANA Considerations
+
+# Acknowledgements
+
+Hello.
+
+# Changelog
+
+
+--- back
+
