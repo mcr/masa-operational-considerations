@@ -27,7 +27,13 @@ author:
 
 normative:
   BCP14: RFC8174
-  I-D.ietf-anima-bootstrapping-keyinfra:
+  I-D.ietf-anima-bootstrapping-keyinfra: BRSKI
+  ieee802-1AR:
+    target: "http://standards.ieee.org/findstds/standard/802.1AR-2009.html"
+    title: "IEEE 802.1AR Secure Device Identifier"
+    author:
+      ins: "IEEE Standard"
+    date: 2009
 
 informative:
   RFC7030:
@@ -46,7 +52,50 @@ protocol mechanisms.
 
 # Introduction
 
-XXX
+{{I-D.ietf-anima-bootstrapping-keyinfra}} introduces a mechanism for
+new devices (called pledges) to be onboarded into a network without
+intervention from an expert operator.
+
+This mechanism leverages the pre-existing relationship between a device and
+the manufacturer that built the device.  There are two aspects to this
+relationship: the provision of an identity for the device by the
+manufacturer (the IDevID), and a mechanism which convinces the device to
+trust the new owner (the {{RFC8366}} voucher).
+
+The manufacturer, or their designate, is involved in both aspects of this
+process.  This requires the manufacturer to operate a significant process for
+each aspect.
+
+This document offers a number of operational considerations for each aspect.
+
+The first aspect is the device identity in the form of an {{ieee802-1AR}}
+certificate that is installed at manufacturing time in the device.  The first
+section of this document deals with operational considerations of building
+this public key infrastructure.
+
+The second aspect is the use of the Manufacturer Authorized Signing Authority
+(MASA), as described in {{-BRSKI}} section 2.5.4.   The device needs to have
+the MASA anchor built in; the exact nature of the anchor is subject to a
+many possibilities.  The second section of this document deals with a number
+of options for architecting the security of the MASA relationship.
+
+There are some additional considerations for a MASA that deals with
+constrained vouchers as described in
+{{I-D.ietf-anima-constrained-voucher}}. In particular in the COSE signed
+version, there are no PKI structure included in the voucher mechanism, so
+cryptographic hygiene needs a different set of tradeoffs.
+
+# Operational Considerations for Manufacturer IDevID Public Key Infrastructure
+
+TBD
+
+# Operational Considerations for Manufacturer Authorized Signing Authority (MASA)
+
+TBD
+
+# Operational Considerations for Constrained MASA
+
+TBD
 
 # Privacy Considerations
 
