@@ -89,7 +89,9 @@ cryptographic hygiene needs a different set of tradeoffs.
 
 # Operational Considerations for Manufacturer IDevID Public Key Infrastructure
 
-TBD
+The manufacturer has the responsability to provision a keypair into each
+device as part of the manufacturing process.  There are a variety of
+mechanisms to accomplish this
 
 # Operational Considerations for Manufacturer Authorized Signing Authority (MASA)
 
