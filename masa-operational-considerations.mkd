@@ -27,6 +27,8 @@ author:
 
 normative:
   BCP14: RFC8174
+  RFC8366:
+  I-D.ietf-anima-constrained-voucher:
   I-D.ietf-anima-bootstrapping-keyinfra: BRSKI
   ieee802-1AR:
     target: "http://standards.ieee.org/findstds/standard/802.1AR-2009.html"
