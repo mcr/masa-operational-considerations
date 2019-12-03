@@ -39,6 +39,12 @@ normative:
 
 informative:
   RFC7030:
+  BedOfNails:
+    title: "In-circuit test"
+    author:
+      org: "Wikipedia"
+    target: "https://en.wikipedia.org/wiki/In-circuit_test#Bed_of_nails_tester"
+    date: 2019
 
 --- abstract
 
@@ -91,7 +97,74 @@ cryptographic hygiene needs a different set of tradeoffs.
 
 The manufacturer has the responsability to provision a keypair into each
 device as part of the manufacturing process.  There are a variety of
-mechanisms to accomplish this
+mechanisms to accomplish this, which this document will overview.
+
+There are two fundamental ways to generate IDevID certificates for devices:
+
+1) generating a private key on the device, creating a Certificate Signing
+Request (or equivalent), and then returning a certificate to the device.
+
+2) generating a private key outside the device, signing the certificate, and
+the installing both into the device.
+
+There is a third situation where the IDevID is provided as part of a Trusted
+Platform Module (TPM), in which case the TPM vendor may be making the same
+tradeoffs.  Or the mechanisms to install the certificate into the TPM will
+use TPM APIs.
+
+## On-device private key generation
+
+Generating the key on-device has the advantage that the private key never
+leaves the device.  The disadvantage is that the device may not have a
+verified random number generator.
+
+There are a number of options of how to get the public key securely from the
+device to the certification authority.  This transmission must be done in an
+integral manner, and must be securely associated with the assigned serial
+number.  The serial number goes into the certificate, and the resulting
+certificate needs to be loaded into the manufacturer's asset database.
+This asset database needs to be shared with the MASA.
+
+One way to do the transmission is during a manufacturing during a Bed of
+Nails (see {{BedOfNails}}) or Boundary Scan.   There are other ways that
+could be used where a certificate signing request is sent over a special
+network channel after the system has been started the first time.
+There are risks with these methods, as an attacker with physical access may
+be able to put device back into this mode afterwards.
+
+## Off-device private key generation
+
+Generating the key off-device has the advantage that the randomness of the
+private key can be better analyzed.  As the private key is available to the
+manufacturing infrastructure, the authenticity of the public key is well
+known ahead of time.   A serial number for the device can be assigned and
+placed into a certificate.  The private key and certificate could be
+programmed into the device along with the initial bootloader firmware in a
+single step.
+
+The major downside to generating the private key off-device is that it could
+be seen by the manufacturing infrastructure.  This makes the manufacturing
+infrastructure a high-value attack target, so mechanisms that keep the
+private key secure within the manufacturing process, yet allow the device to
+get access to the private key would be adventageous.
+
+Per-device keys would be ideal, but that would require that an individual
+per-device key be provisioned in seperately.  An alternate mechanism would be
+that a constant decryption key is kept in the firmware, but this provides
+little protection against an attack on the manufacturing infrastructure
+unless the firmware is loaded in a completely different place than the
+keypair.
+
+## Public Key infrastructure for IDevID
+
+A three-tier PKI infrastructure is appropriate.  This entails having a root CA created with the key kept offline, and a number of intermediate CAs that have online keys that issue "day-to-day" certificates.
+
+The root private key should be kept offline, quite probably in a Hardware Security Module if financially feasible.  If not, then it should be secret-split across six or seven people.
+
+The root CA is then used to sign a number of intermediate entities: this will include an intermediate CA for the Registrar that is deployed into each redundant NOC location.  Multiple intermediate CAs with a common root provides significantly more security and operational flexibility than attempts to share a private key among locations.
+
+
+
 
 # Operational Considerations for Manufacturer Authorized Signing Authority (MASA)
 
