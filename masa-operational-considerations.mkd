@@ -28,7 +28,7 @@ author:
 normative:
   BCP14: RFC8174
   RFC8366:
-  I-D.ietf-anima-constrained-voucher:
+  I-D.ietf-anima-constrained-voucher: constrainedvoucher
   I-D.ietf-anima-bootstrapping-keyinfra: BRSKI
   ieee802-1AR:
     target: "http://standards.ieee.org/findstds/standard/802.1AR-2009.html"
@@ -159,18 +159,107 @@ keypair.
 
 A three-tier PKI infrastructure is appropriate.  This entails having a root CA created with the key kept offline, and a number of intermediate CAs that have online keys that issue "day-to-day" certificates.
 
-The root private key should be kept offline, quite probably in a Hardware Security Module if financially feasible.  If not, then it should be secret-split across six or seven people.
+The root private key should be kept offline, quite probably in a Hardware Security Module if financially feasible.  If not, then it should be secret-split across seven to nine people,
+with a threshold of four to five people.  The split secrets should be kept in geographically diverse places if the manufacturer has operations in multiple places.
 
-The root CA is then used to sign a number of intermediate entities: this will include an intermediate CA for the Registrar that is deployed into each redundant NOC location.  Multiple intermediate CAs with a common root provides significantly more security and operational flexibility than attempts to share a private key among locations.
+Ongoing access to the root-CA is important, but not as critical as access to the MASA
+key.
 
+The root CA is then used to sign a number of intermediate entities.
+If manufacturing occurs in multiple factories, then an intermediate CA for each factory is appropriate.  It is also reasonable to use different intermediate CAs for different product lines.   It may also be valuable to split IDevID certificates across intermediate CAs
+in a round-robin fashion for products with high volumes.
 
+Cycling the intermediate CAs after a period of a few months or so is a quite reasonable strategy.  The intermediate CAs private key may be destroyed after it signed some number
+of IDevIDs, and a new key generated.  The IDevID certificates have very long (ideally infinite) validity lifetimes for reasons that {{ieee802-1AR}} explains, but once the certificates have been created the intermediate CA has no further obligations as neither
+CRLs nor OCSP are appropriate.
 
+In all cases the serialNumber embedded in the certificate must be unique across all products produced by the manufacturer.  This suggests some amount of structure to the serialNumber,
+such that different intermediate CAs do not need to coordinate when issuing certificates.
 
 # Operational Considerations for Manufacturer Authorized Signing Authority (MASA)
 
-TBD
+The manufacturer needs to make a Signing Authority available to new owners so that
+they may obtain {{RFC8366}} format vouchers to prove ownership.  This section initially
+assumes that the manufacturer will provide this Authority internally, but subsequent sections deal with some adjustments when the authority is externally run.
+
+In any case, the manufacturer SHOULD plan for a situation where the manufacturer is no longer able or interested in running the Authority: this does not have to an unhappy situation of the manufacturer going out of business.  It could be a happy event where the manufacturer goes through a merge or acquisition and it makes sense to consolidate the
+Signing Authority in another part of the organziation.
+
+A plan to escrow the signing keys SHOULD be detailed, and it is likely that customers will want to review it for high-value products.
+
+The anchors for the MASA need to be "baked-in" to the device firmware so that they
+are always available to validate vouchers.  In order to avoid locking down a single
+validation key, a PKI infrastructure is appropriate.  Note that constrained devices without code space to parse and validate a public key certificate chain require different
+considerations, and this document does not (yet) provide that consideration.
+
+There are many ways to construct a resilient PKI to sign vouchers.
+
+## Self-contained multi-product MASA
+
+The most obvious is to just create a new offline CA, have it periodically sign
+a new End-Entity (EE) Certificate with an online private key, and use that to sign voucher
+requests.  The entity used to sign {{RFC8366}} format vouchers does not need to be
+a certificate authority.
+
+The public key of the offline CA is then built-in to the firmware of the device, providing
+a trust anchor with with to validate vouchers.  The End-Entity certificate used to sign the
+voucher is included in the certificate set in the CMS structure that is used to sign the  voucher.
+The root CA's trust anchor should *also* be included, even though it is self-signed, as
+this permits auditing elements in a Registrar to validate the End-Entity Certificate.
+
+The inclusion of the full chain also supports a Trust-on-First-Use (TOFU) workflow for the manager of the Registrar: they can see the trust anchor chain and can compare a fingerprint displayed on their screen with one that could be included in packaging or other sales channel information.
+
+When building the MASA public key into a device, only the public key contents matter, not the structure of the self-signed certificate itself.  Using only the public key enables a MASA architecture to evolve from a single self-contained system into a more complex architecture later on.
+
+## Self-contained per-product MASA {#perproduct}
+
+A simple enhancement to the previous scenario is to have a unique MASA offline key for each product line.  This has a few advantages:
+
+* if the private keys are kept separately (under different encryption keys), then compromise of a single product lines MASA does not compromise all products.
+* if a product line is sold to another entity, or if it has to go through an escrow process due to the product going out of production, then the process affects only a single product line.
+* it is safe to have serialNumber duplicated among different product lines since a voucher for one product line would not validate on another product line.
+
+The disadvantage is that it requires a private key to be stored per product line, and most large OEMs have many dozens of product lines.  If the keys are stored in a single Hardware Security Module (HSM), with the access to it split across the same parties, then some of the cryptographic advantages of different private keys goes away, as a compromise of one key
+likely compromises them all.  Given a HSM, the most likely way a key is compromised is by an attacker getting authorization on the HSM through theft or coercion.
+
+The use of per-product MASA signing keys is encouraged.
+
+## Per-product MASA keys intertwined with IDevID PKI
+
+The IDevID certificate chain (the intermediate CA and root CA that signed the IDevID certificate) should be included in the device firmware so that they can be communicated during the BRSKI-EST exchange.
+
+Since they are already present, why not use of them as the MASA trust anchor?
+
+A voucher needs to be signed by recognized End-Entity, which has been authorized to be a voucher signer.  The challenge with combining it into the IDevID PKI is making sure that only an authorized entity can sign the vouchers.  This suggests that it can not be the
+same intermediate CA that is used to sign the IDevID, since that CA should have the
+authority to sign vouchers. If it did, then the End-Entities that it created, the IDevID for devices, would then be able to sign vouchers, which would not be an appropriate authorization.
+
+The PKI root CA therefore needs to sign an intermediate CA, or End-Entity certificate with an extension OID that is specific for Voucher Authorization.  This is easy to do as policy OIDs can be created from Private Enterprise Numbers.  There is no need for standardization, as the entity doing the signing is also creating the verification code.  If the entire PKI operation was outsource, then there would be a benefit for standardization.
+
+## Rotating MASA authorization keys {#rotatingkeys}
+
+As a variation of the scenario described in {{perproduct}}, there could be multiple Signing Authority keys per product line.   They could be rotated though in some deterministic order.
+For instance, serial numbers ending in 0 would have MASA key 0 embedded in them at manufacturing time.  The asset database would have to know which key that corresponded to, and it would have to produce vouchers using that key.
+
+There are significant downsides to this mechanism:
+
+* all of the MASA signing keys need to be online and available in order to respond to any voucher request
+* it is necessary to keep track of which device trust which key in the asset database
+
+There is no obvious advantage to doing this if all the MASA signing private keys are kept
+in the same device, under control of the same managers.  But if the keys are spread out to multiple locations and are under control of different people, then there may be some advantage.  A single MASA signing authority key compromise does not cause a recall of all
+devices, but only the portion that had that key embedded in it.
+
+The relationship between signing key and device could be temporal: all devices made on Tuesday could have the same key, there could be hundreds of keys, each one used only for a few hundred devices.  There are many variations possible.
+
+The major advantage comes with the COSE signed constrained-vouchers described in {{-constrainedvoucher}}.  In this context there isn't space in the voucher for a certificate chain, nor is there code space in the device to validate a certificate chain.  The (public) key used to sign is embedded directly in the firmware of each device without the benefit
+of any public key infrastructure to allow indirection of the key.
 
 # Operational Considerations for Constrained MASA
+
+TBD
+
+# Operational Considerations for creating Nonceless vouchers
 
 TBD
 
@@ -183,6 +272,8 @@ YYY
 ZZZ
 
 # IANA Considerations
+
+This document makes no IANA requests.
 
 # Acknowledgements
 
