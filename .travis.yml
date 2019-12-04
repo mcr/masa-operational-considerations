@@ -10,6 +10,5 @@ before_install:
   - "export PATH=$HOME/.local/bin:$PATH."
 
 install:
-  - "./install-pyang-sid-work"
 
 script: "make"
