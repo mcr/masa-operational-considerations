@@ -1,7 +1,7 @@
 ---
 title: Operational Considerations for Manufacturer Authorized Signing Authority
 abbrev: MASA Considerations
-docname: draft-richardson-anima-masa-considerations-00
+docname: draft-richardson-anima-masa-considerations-01
 
 # stand_alone: true
 
