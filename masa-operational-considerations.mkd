@@ -30,6 +30,14 @@ normative:
   RFC8366:
   I-D.ietf-anima-constrained-voucher: constrainedvoucher
   I-D.ietf-anima-bootstrapping-keyinfra: BRSKI
+  I-D.moskowitz-ecdsa-pki:
+  threetier:
+    target: "https://en.wikipedia.org/wiki/Multitier_architecture"
+    title: "Multitier architecture"
+    author:
+      ins: "Wikipedia"
+    date: "December 2019"
+
   ieee802-1AR:
     target: "http://standards.ieee.org/findstds/standard/802.1AR-2009.html"
     title: "IEEE 802.1AR Secure Device Identifier"
@@ -111,6 +119,13 @@ There is a third situation where the IDevID is provided as part of a Trusted
 Platform Module (TPM), in which case the TPM vendor may be making the same
 tradeoffs.  Or the mechanisms to install the certificate into the TPM will
 use TPM APIs.
+
+The document {{I-D.moskowitz-ecdsa-pki}} provides some practical instructions
+on setting up a reference implementation for ECDSA keys using a three-tier
+mechanism.  This document recommends the use of ECDSA keys for the root
+and intermediate CAs, but there may be operational reasons why an RSA intermediate
+CA will be required for some legacy TPM equipment.
+
 
 ## On-device private key generation
 
