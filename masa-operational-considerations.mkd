@@ -195,7 +195,46 @@ such that different intermediate CAs do not need to coordinate when issuing cert
 
 The manufacturer needs to make a Signing Authority available to new owners so that
 they may obtain {{RFC8366}} format vouchers to prove ownership.  This section initially
-assumes that the manufacturer will provide this Authority internally, but subsequent sections deal with some adjustments when the authority is externally run.
+assumes that the manufacturer will provide this Authority internally, but
+subsequent sections deal with some adjustments when the authority is
+externally run.
+
+The MASA is a public facing web system.  It will be subject to loads from
+legitimate users when a network is bootstrapped for the first time.
+The legitimate load will be proportional to sales.
+
+The MASA will be subject to a malicious load: the best way to deflect
+unwanted users is to require TLS Client Certificates for all connections,
+even if the TLS Certificate is not validated.
+This increases the effort requires for attackers, and if they repeat the same
+certificate then it becomes easier to reject such attackers earlier.
+The use of this certificate forces attackers to generate new key pairs and certificates each time.
+The accompanying document
+{{I-D.richardson-registrar-operational-considerations}} recommends in section
+5.2.1 recommends the use of a public anchor, or an anchor that is known to
+the MASA.
+
+Web framework three-tier mechanisms are the most obvious. See {{threetier}} for an overview.
+Consideration should be made to deploying the presentation layer into
+multiple data centers in order to provide resiliency against distributed
+denial of service (DDoS) attacks that affect all tenants of that data
+center.
+Consideration should be given to the use of a cloud front end to mitigate
+attacks, however, such a system needs to be able to securely transmit the TLS
+Client Certificates, it the MASA wants to do supply chain integration.
+
+The middle (application) tier needs to be scalable, but it is unlikely that
+it needs to scale very much on a per-minute or even per-hour basis.
+It is probably easier and more reliable to have application tiers do database
+operations across the Internet or via VPN to a single location database
+cluster than it is to handle asynchronous database operations resulting from
+geographically dispersed multi-master database systems.
+The assets tables that the MASA needs scale linearly with the number of
+products sold.
+Many columns could be replicated in a read-only manner from a sales
+database.
+Direct integration with a sales system could be considered, but would involve
+a more significant security impact analysis.
 
 In any case, the manufacturer SHOULD plan for a situation where the manufacturer is no longer able or interested in running the Authority: this does not have to an unhappy situation of the manufacturer going out of business.  It could be a happy event where the manufacturer goes through a merge or acquisition and it makes sense to consolidate the
 Signing Authority in another part of the organziation.
