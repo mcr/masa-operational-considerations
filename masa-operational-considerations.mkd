@@ -1,7 +1,7 @@
 ---
 title: Operational Considerations for Manufacturer Authorized Signing Authority
 abbrev: MASA Considerations
-docname: draft-richardson-anima-masa-considerations-01
+docname: draft-richardson-anima-masa-considerations-02
 
 # stand_alone: true
 
@@ -257,8 +257,15 @@ requests.  The entity used to sign {{RFC8366}} format vouchers does not need to 
 a certificate authority.
 
 The public key of the offline CA is then built-in to the firmware of the device, providing
-a trust anchor with with to validate vouchers.  The End-Entity certificate used to sign the
-voucher is included in the certificate set in the CMS structure that is used to sign the  voucher.
+a trust anchor with with to validate vouchers.  In addition, the DN of the
+appropriate End-Entity certificate needs to built-in to the device, otherwise
+a voucher created for one product could be used to sign a voucher for another
+product.
+This situation is also mitigated by never repeating serialNumbers across
+product lines.
+
+An End-Entity certificate used to sign the
+voucher is included in the certificate set in the CMS structure that is used to sign the voucher.
 The root CA's trust anchor should *also* be included, even though it is self-signed, as
 this permits auditing elements in a Registrar to validate the End-Entity Certificate.
 
