@@ -30,6 +30,7 @@ normative:
   RFC8366:
   I-D.ietf-anima-constrained-voucher: constrainedvoucher
   I-D.ietf-anima-bootstrapping-keyinfra: BRSKI
+  I-D.richardson-anima-registrar-considerations:
   I-D.moskowitz-ecdsa-pki:
   threetier:
     target: "https://en.wikipedia.org/wiki/Multitier_architecture"
@@ -210,7 +211,7 @@ This increases the effort requires for attackers, and if they repeat the same
 certificate then it becomes easier to reject such attackers earlier.
 The use of this certificate forces attackers to generate new key pairs and certificates each time.
 The accompanying document
-{{I-D.richardson-registrar-operational-considerations}} recommends in section
+{{I-D.richardson-anima-registrar-considerations}} recommends in section
 5.2.1 recommends the use of a public anchor, or an anchor that is known to
 the MASA.
 
