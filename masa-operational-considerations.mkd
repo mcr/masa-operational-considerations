@@ -25,6 +25,12 @@ author:
   org: Sandelman Software Works
   email: mcr+ietf@sandelman.ca
 
+- ins: W. Pan
+  name: Wei Pan
+  org: Huawei Technologies
+  email: william.panwei@huawei.com
+  
+
 normative:
   BCP14: RFC8174
   RFC8366:
@@ -92,7 +98,7 @@ this public key infrastructure.
 
 The second aspect is the use of the Manufacturer Authorized Signing Authority
 (MASA), as described in {{-BRSKI}} section 2.5.4.   The device needs to have
-the MASA anchor built in; the exact nature of the anchor is subject to a
+the MASA anchor built in; the exact nature of the anchor is subject to
 many possibilities.  The second section of this document deals with a number
 of options for architecting the security of the MASA relationship.
 
@@ -137,7 +143,7 @@ verified random number generator.
 There are a number of options of how to get the public key securely from the
 device to the certification authority.  This transmission must be done in an
 integral manner, and must be securely associated with the assigned serial
-number.  The serial number goes into the certificate, and the resulting
+number of the device.  The serial number goes into the certificate, and the resulting
 certificate needs to be loaded into the manufacturer's asset database.
 This asset database needs to be shared with the MASA.
 
@@ -187,7 +193,7 @@ in a round-robin fashion for products with high volumes.
 
 Cycling the intermediate CAs after a period of a few months or so is a quite reasonable strategy.  The intermediate CAs private key may be destroyed after it signed some number
 of IDevIDs, and a new key generated.  The IDevID certificates have very long (ideally infinite) validity lifetimes for reasons that {{ieee802-1AR}} explains, but once the certificates have been created the intermediate CA has no further obligations as neither
-CRLs nor OCSP are appropriate.
+CRLs nor OCSP is appropriate.
 
 In all cases the serialNumber embedded in the certificate must be unique across all products produced by the manufacturer.  This suggests some amount of structure to the serialNumber,
 such that different intermediate CAs do not need to coordinate when issuing certificates.
@@ -222,7 +228,7 @@ denial of service (DDoS) attacks that affect all tenants of that data
 center.
 Consideration should be given to the use of a cloud front end to mitigate
 attacks, however, such a system needs to be able to securely transmit the TLS
-Client Certificates, it the MASA wants to do supply chain integration.
+Client Certificates, if the MASA wants to do supply chain integration.
 
 The middle (application) tier needs to be scalable, but it is unlikely that
 it needs to scale very much on a per-minute or even per-hour basis.
@@ -257,7 +263,7 @@ requests.  The entity used to sign {{RFC8366}} format vouchers does not need to 
 a certificate authority.
 
 The public key of the offline CA is then built-in to the firmware of the device, providing
-a trust anchor with with to validate vouchers.  The End-Entity certificate used to sign the
+a trust anchor with which to validate vouchers.  The End-Entity certificate used to sign the
 voucher is included in the certificate set in the CMS structure that is used to sign the  voucher.
 The root CA's trust anchor should *also* be included, even though it is self-signed, as
 this permits auditing elements in a Registrar to validate the End-Entity Certificate.
