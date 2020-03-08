@@ -148,8 +148,14 @@ The serial number goes into the certificate, and the resulting certificate needs
 This asset database needs to be shared with the MASA.
 
 One way to do the transmission is during a manufacturing during a Bed of Nails (see {{BedOfNails}}) or Boundary Scan.
-There are other ways that could be used where a certificate signing request is sent over a special network channel after the system has been started the first time.
-There are risks with these methods, as an attacker with physical access may be able to put device back into this mode afterwards.
+There are other ways that could be used where a certificate signing request is sent over a special network channel when the device is powered up in the factory.  
+After the key generation, the device needs to set a flag such that it no longer generates a key, or will accept a new IDevID via the factory connection. 
+This may be a software settings, or could be as dramatic as blowing a fuse.
+
+There may be risks with this methods if an attacker with physical access is able to put device back into an unconfigured mode, particularly if this may permit the attacker to get access to the private key material.
+When done on a single device, Such an attack may be able to replace the IDevID with one signed by another manufacturer. 
+That does not result in a risk of counterfeit devices.
+An attack that is able to extract the private key could clone the device.
 
 ### Off-device private key generation
 
