@@ -162,7 +162,7 @@ An attack that is able to extract the private key could clone the device.
 Generating the key off-device has the advantage that the randomness of the
 private key can be better analyzed.
 As the private key is available to the manufacturing infrastructure, the authenticity of the public key is well known ahead of time.
-A serial number for the device can be assigned and placed into a certificate.
+If the device does not come with a serial number in silicon, then one should be be assigned and placed into a certificate.
 The private key and certificate could be programmed into the device along with the initial bootloader firmware in a single step.
 
 The major downside to generating the private key off-device is that it could be seen by the manufacturing infrastructure.
@@ -207,8 +207,7 @@ The root private key should be kept offline, quite probably in a Hardware Securi
 If not, then it should be secret-split across seven to nine people, with a threshold of four to five people.
 The split secrets should be kept in geographically diverse places if the manufacturer has operations in multiple places.
 
-Ongoing access to the root-CA is important, but not as critical as access to the MASA
-key.
+Ongoing access to the root-CA is important, but not as critical as access to the MASA key.
 
 The root CA is then used to sign a number of intermediate entities.
 If manufacturing occurs in multiple factories, then an intermediate CA for each factory is appropriate.
@@ -217,8 +216,13 @@ It may also be valuable to split IDevID certificates across intermediate CAs in 
 
 Cycling the intermediate CAs after a period of a few months or so is a quite reasonable strategy.
 The intermediate CAs private key may be destroyed after it signed some number of IDevIDs, and a new key generated.
-The IDevID certificates have very long (ideally infinite) validity lifetimes for reasons that {{ieee802-1AR}} explains, but once the certificates have been created the intermediate CA has no further obligations as neither CRLs nor OCSP is appropriate.
+The IDevID certificates have very long (ideally infinite) validity lifetimes for reasons that {{ieee802-1AR}} explains.
+The intermediate CA will have a private key, likely kept online, which is used to sign each generated IDevID. Once the IDevID are created, the private key is no longer needed and can either be destroyed, or taken offline.
+In other CAs, the intermediate CA's private key (or another designated key) is often needed to sign OCSP {{?RFC6960}} or CRLS {{?RFC5280}}.  
+As the IDevID process does not in general support revocation, keeping such keys online is not necessary.
 {EDIT NOTE: REVIEW of this NEEDED}
+
+The intermediate CA certificate SHOULD be signed by the root-CA with indefinite (notAfter: 99991231) duration as well.
 
 In all cases the serialNumber embedded in the certificate must be unique across all products produced by the manufacturer.
 This suggests some amount of structure to the serialNumber, such that different intermediate CAs do not need to coordinate when issuing certificates.
