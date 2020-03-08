@@ -29,7 +29,7 @@ author:
   name: Wei Pan
   org: Huawei Technologies
   email: william.panwei@huawei.com
-  
+
 
 normative:
   BCP14: RFC8174
@@ -137,59 +137,49 @@ CA will be required for some legacy TPM equipment.
 ## On-device private key generation
 
 Generating the key on-device has the advantage that the private key never
-leaves the device.  The disadvantage is that the device may not have a
-verified random number generator.
+leaves the device.
+The disadvantage is that the device may not have a verified random number generator.
 
 There are a number of options of how to get the public key securely from the
-device to the certification authority.  This transmission must be done in an
-integral manner, and must be securely associated with the assigned serial
-number of the device.  The serial number goes into the certificate, and the resulting
-certificate needs to be loaded into the manufacturer's asset database.
+device to the certification authority.
+This transmission must be done in an integral manner, and must be securely associated with the assigned serial number of the device.
+The serial number goes into the certificate, and the resulting certificate needs to be loaded into the manufacturer's asset database.
 This asset database needs to be shared with the MASA.
 
-One way to do the transmission is during a manufacturing during a Bed of
-Nails (see {{BedOfNails}}) or Boundary Scan.   There are other ways that
-could be used where a certificate signing request is sent over a special
-network channel after the system has been started the first time.
-There are risks with these methods, as an attacker with physical access may
-be able to put device back into this mode afterwards.
+One way to do the transmission is during a manufacturing during a Bed of Nails (see {{BedOfNails}}) or Boundary Scan.
+There are other ways that could be used where a certificate signing request is sent over a special network channel after the system has been started the first time.
+There are risks with these methods, as an attacker with physical access may be able to put device back into this mode afterwards.
 
 ## Off-device private key generation
 
 Generating the key off-device has the advantage that the randomness of the
-private key can be better analyzed.  As the private key is available to the
-manufacturing infrastructure, the authenticity of the public key is well
-known ahead of time.   A serial number for the device can be assigned and
-placed into a certificate.  The private key and certificate could be
-programmed into the device along with the initial bootloader firmware in a
-single step.
+private key can be better analyzed.
+As the private key is available to the manufacturing infrastructure, the authenticity of the public key is well known ahead of time.
+A serial number for the device can be assigned and placed into a certificate.
+The private key and certificate could be programmed into the device along with the initial bootloader firmware in a single step.
 
-The major downside to generating the private key off-device is that it could
-be seen by the manufacturing infrastructure.  This makes the manufacturing
-infrastructure a high-value attack target, so mechanisms that keep the
-private key secure within the manufacturing process, yet allow the device to
-get access to the private key would be adventageous.
+The major downside to generating the private key off-device is that it could be seen by the manufacturing infrastructure.
+This makes the manufacturing infrastructure a high-value attack target, so mechanisms that keep the private key secure within the manufacturing process, yet allow the device to get access to the private key would be adventageous.
 
-Per-device keys would be ideal, but that would require that an individual
-per-device key be provisioned in seperately.  An alternate mechanism would be
-that a constant decryption key is kept in the firmware, but this provides
-little protection against an attack on the manufacturing infrastructure
-unless the firmware is loaded in a completely different place than the
-keypair.
+Per-device keys would be ideal, but that would require that an individual per-device key be provisioned in seperately.
+An alternate mechanism would be that a constant decryption key is kept in the firmware, but this provides little protection against an attack on the manufacturing infrastructure unless the firmware is loaded in a completely different place than the keypair.
 
 ## Public Key infrastructure for IDevID
 
-A three-tier PKI infrastructure is appropriate.  This entails having a root CA created with the key kept offline, and a number of intermediate CAs that have online keys that issue "day-to-day" certificates.
+A three-tier PKI infrastructure is appropriate.
+This entails having a root CA created with the key kept offline, and a number of intermediate CAs that have online keys that issue "day-to-day" certificates.
 
-The root private key should be kept offline, quite probably in a Hardware Security Module if financially feasible.  If not, then it should be secret-split across seven to nine people,
-with a threshold of four to five people.  The split secrets should be kept in geographically diverse places if the manufacturer has operations in multiple places.
+The root private key should be kept offline, quite probably in a Hardware Security Module if financially feasible.
+If not, then it should be secret-split across seven to nine people, with a threshold of four to five people.
+The split secrets should be kept in geographically diverse places if the manufacturer has operations in multiple places.
 
 Ongoing access to the root-CA is important, but not as critical as access to the MASA
 key.
 
 The root CA is then used to sign a number of intermediate entities.
-If manufacturing occurs in multiple factories, then an intermediate CA for each factory is appropriate.  It is also reasonable to use different intermediate CAs for different product lines.   It may also be valuable to split IDevID certificates across intermediate CAs
-in a round-robin fashion for products with high volumes.
+If manufacturing occurs in multiple factories, then an intermediate CA for each factory is appropriate.
+It is also reasonable to use different intermediate CAs for different product lines.
+It may also be valuable to split IDevID certificates across intermediate CAs in a round-robin fashion for products with high volumes.
 
 Cycling the intermediate CAs after a period of a few months or so is a quite reasonable strategy.  The intermediate CAs private key may be destroyed after it signed some number
 of IDevIDs, and a new key generated.  The IDevID certificates have very long (ideally infinite) validity lifetimes for reasons that {{ieee802-1AR}} explains, but once the certificates have been created the intermediate CA has no further obligations as neither
