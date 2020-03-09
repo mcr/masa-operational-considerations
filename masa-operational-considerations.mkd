@@ -129,6 +129,8 @@ Request (or equivalent), and then returning a certificate to the device.
 2) generating a private key outside the device, signing the certificate, and
 the installing both into the device.
 
+3) deriving the private key from a previously installed secret seed, that is shared with only the manufacturer
+
 There is a third situation where the IDevID is provided as part of a Trusted
 Platform Module (TPM), in which case the TPM vendor may be making the same
 tradeoffs.  Or the mechanisms to install the certificate into the TPM will
