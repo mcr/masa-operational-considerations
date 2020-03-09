@@ -276,7 +276,10 @@ a more significant security impact analysis.
 In any case, the manufacturer SHOULD plan for a situation where the manufacturer is no longer able or interested in running the Authority: this does not have to an unhappy situation of the manufacturer going out of business.
 It could be a happy event where the manufacturer goes through a merge or acquisition and it makes sense to consolidate the Signing Authority in another part of the organziation.
 
-A plan to escrow the signing keys SHOULD be detailed, and it is likely that customers will want to review it for high-value products.
+Business continuity plan should including backing up the voucher signing keys.
+This may involve multiple Hardware Security Modules, and secret splitting mechanisms 
+SHOULD be employed.   
+For large value items, customers are going to need to review the plan as part of their contingency audits.
 
 The anchors for the MASA need to be "baked-in" to the device firmware so that they
 are always available to validate vouchers.
