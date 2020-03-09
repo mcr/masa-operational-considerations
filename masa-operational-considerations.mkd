@@ -61,6 +61,13 @@ informative:
     target: "https://en.wikipedia.org/wiki/In-circuit_test#Bed_of_nails_tester"
     date: 2019
 
+  RambusCryptoManager:
+    title: "Qualcomm Licenses Rambus CryptoManager Key and Feature Management Security Solution"
+    target: "https://www.rambus.com/qualcomm-licenses-rambus-cryptomanager-key-and-feature-management-security-solution/"
+    author:
+      org: "Qualcomm press release"
+    date: 2014
+      
 --- abstract
 
 This document describes a number of operational modes that a
