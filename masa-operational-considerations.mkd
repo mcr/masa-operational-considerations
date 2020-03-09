@@ -333,13 +333,21 @@ The use of per-product MASA signing keys is encouraged.
 
 The IDevID certificate chain (the intermediate CA and root CA that signed the IDevID certificate) should be included in the device firmware so that they can be communicated during the BRSKI-EST exchange.
 
-Since they are already present, why not use of them as the MASA trust anchor?
+Since they are already present, could they be used as the MASA trust anchor as well?
 
-A voucher needs to be signed by recognized End-Entity, which has been authorized to be a voucher signer.  The challenge with combining it into the IDevID PKI is making sure that only an authorized entity can sign the vouchers.  This suggests that it can not be the
-same intermediate CA that is used to sign the IDevID, since that CA should have the
-authority to sign vouchers. If it did, then the End-Entities that it created, the IDevID for devices, would then be able to sign vouchers, which would not be an appropriate authorization.
+In order to do this there is an attack that needs to mitigated.
+Since the root-CA that creates IDevIDs and the root-CA that creates vouchers are the same, when validating a voucher, a pledge needs to make sure that it is signed by a key authorized to sign vouchers.
+In other scenarios any key signed by the voucher-signing-root-CA would be valid, but in this scenario that would also include any IDevID, such as would be installed in any other device.
+Without an additional signal as to which keys can sign vouchers, and which keys are just IDevID keys, then it would be possible to sign vouchers with any IDevID private key, rather than just the designated voucher-signing key.
+An attacker that could extract a private key from even one instance of a product, could use that to sign vouchers, and impersonate the MASA.
 
-The PKI root CA therefore needs to sign an intermediate CA, or End-Entity certificate with an extension OID that is specific for Voucher Authorization.  This is easy to do as policy OIDs can be created from Private Enterprise Numbers.  There is no need for standardization, as the entity doing the signing is also creating the verification code.  If the entire PKI operation was outsource, then there would be a benefit for standardization.
+The challenge with combining it into the IDevID PKI is making sure that only an authorized entity can sign the vouchers.
+The solution is that it can not be the same intermediate CA that is used to sign the IDevID, since that CA should have the authority to sign vouchers.
+
+The PKI root CA therefore needs to sign an intermediate CA, or End-Entity certificate with an extension OID that is specific for Voucher Authorization.
+This is easy to do as policy OIDs can be created from Private Enterprise Numbers.
+There is no need for standardization, as the entity doing the signing is also creating the verification code.
+If the entire PKI operation was outsource, then there would be a benefit for standardization.
 
 ## Rotating MASA authorization keys {#rotatingkeys}
 
