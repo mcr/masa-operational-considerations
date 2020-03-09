@@ -67,7 +67,7 @@ informative:
     author:
       org: "Qualcomm press release"
     date: 2014
-      
+
 --- abstract
 
 This document describes a number of operational modes that a
@@ -157,12 +157,12 @@ The serial number goes into the certificate, and the resulting certificate needs
 This asset database needs to be shared with the MASA.
 
 One way to do the transmission is during a manufacturing during a Bed of Nails (see {{BedOfNails}}) or Boundary Scan.
-There are other ways that could be used where a certificate signing request is sent over a special network channel when the device is powered up in the factory.  
-After the key generation, the device needs to set a flag such that it no longer generates a key, or will accept a new IDevID via the factory connection. 
+There are other ways that could be used where a certificate signing request is sent over a special network channel when the device is powered up in the factory.
+After the key generation, the device needs to set a flag such that it no longer generates a key, or will accept a new IDevID via the factory connection.
 This may be a software settings, or could be as dramatic as blowing a fuse.
 
 There may be risks with this methods if an attacker with physical access is able to put device back into an unconfigured mode, particularly if this may permit the attacker to get access to the private key material.
-When done on a single device, Such an attack may be able to replace the IDevID with one signed by another manufacturer. 
+When done on a single device, Such an attack may be able to replace the IDevID with one signed by another manufacturer.
 That does not result in a risk of counterfeit devices.
 An attack that is able to extract the private key could clone the device.
 
@@ -227,7 +227,7 @@ Cycling the intermediate CAs after a period of a few months or so is a quite rea
 The intermediate CAs private key may be destroyed after it signed some number of IDevIDs, and a new key generated.
 The IDevID certificates have very long (ideally infinite) validity lifetimes for reasons that {{ieee802-1AR}} explains.
 The intermediate CA will have a private key, likely kept online, which is used to sign each generated IDevID. Once the IDevID are created, the private key is no longer needed and can either be destroyed, or taken offline.
-In other CAs, the intermediate CA's private key (or another designated key) is often needed to sign OCSP {{?RFC6960}} or CRLS {{?RFC5280}}.  
+In other CAs, the intermediate CA's private key (or another designated key) is often needed to sign OCSP {{?RFC6960}} or CRLS {{?RFC5280}}.
 As the IDevID process does not in general support revocation, keeping such keys online is not necessary.
 {EDIT NOTE: REVIEW of this NEEDED}
 
@@ -286,8 +286,8 @@ In any case, the manufacturer SHOULD plan for a situation where the manufacturer
 It could be a happy event where the manufacturer goes through a merge or acquisition and it makes sense to consolidate the Signing Authority in another part of the organziation.
 
 Business continuity plan should including backing up the voucher signing keys.
-This may involve multiple Hardware Security Modules, and secret splitting mechanisms 
-SHOULD be employed.   
+This may involve multiple Hardware Security Modules, and secret splitting mechanisms
+SHOULD be employed.
 For large value items, customers are going to need to review the plan as part of their contingency audits.
 
 The anchors for the MASA need to be "baked-in" to the device firmware so that they
