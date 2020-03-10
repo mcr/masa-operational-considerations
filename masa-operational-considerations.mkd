@@ -1,5 +1,5 @@
 ---
-title: Operational Considerations for Manufacturer Authorized Signing Authority
+title: IDevID, MASA and Voucher considerations for BRSKI infrastructure
 abbrev: MASA Considerations
 docname: draft-richardson-anima-masa-considerations-03
 
