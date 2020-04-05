@@ -68,6 +68,27 @@ informative:
       org: "Qualcomm press release"
     date: 2014
 
+  kskceremony:
+    title: "DNSSEC Practice Statement for the Root Zone ZSK Operator"
+    target: "https://www.iana.org/dnssec/dps/zsk-operator/dps-zsk-operator-v2.0.pdf"
+    author:
+      org: "Verisign"
+    date: 2017
+
+  rootkeyceremony:
+     title: "Root Key Ceremony, Cryptography Wiki"
+     target: "https://cryptography.fandom.com/wiki/Root_Key_Ceremony"
+     author:
+       org: "Community"
+     date: "2020-04-04"
+
+  keyceremony2:
+     title: "SAS 70 Key Ceremony"
+     target: "http://www.digi-sign.com/compliance/key%20ceremony/index"
+     author:
+       org: "Digi-Sign"
+     date: "2020-04-04"
+
 --- abstract
 
 This document describes a number of operational modes that a
@@ -215,6 +236,9 @@ This entails having a root CA created with the key kept offline, and a number of
 The root private key should be kept offline, quite probably in a Hardware Security Module if financially feasible.
 If not, then it should be secret-split across seven to nine people, with a threshold of four to five people.
 The split secrets should be kept in geographically diverse places if the manufacturer has operations in multiple places.
+For examples of extreme measures, see {{kskceremony}}.
+There is however a wide spectrum of needs, as exampled in {{rootkeyceremony}}.
+The SAS70 audit standard is usually used as a basis for the Ceremony, see {{keyceremony2}}.
 
 Ongoing access to the root-CA is important, but not as critical as access to the MASA key.
 
