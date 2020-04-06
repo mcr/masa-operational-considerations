@@ -87,7 +87,14 @@ informative:
      target: "http://www.digi-sign.com/compliance/key%20ceremony/index"
      author:
        org: "Digi-Sign"
-     date: "2020-04-04"
+     date: "2020-04-04"i
+
+  nistsp800-57:
+    title: "SP 800-57 Part 1 Rev. 4 Recommendation for Key Management, Part 1: General"
+    target: "https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-4/final"
+    author:
+      org: "NIST"
+    date: 2016-01-01
 
 --- abstract
 
