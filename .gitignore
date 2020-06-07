@@ -6,3 +6,5 @@ ietf-voucher-request-tree.txt
 ietf-cwt-voucher-request@*.yang
 ietf-cwt-voucher@*.yang
 yang
+masa-operational-considerations.xml
+masa-operational-considerations.v2v3.xml

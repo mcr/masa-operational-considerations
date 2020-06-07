@@ -1,7 +1,7 @@
 ---
-title: Operational Considerations for Manufacturer Authorized Signing Authority
+title: IDevID, MASA and Voucher considerations for BRSKI infrastructure
 abbrev: MASA Considerations
-docname: draft-richardson-anima-masa-considerations-02
+docname: draft-richardson-anima-masa-considerations-03
 
 # stand_alone: true
 
@@ -24,6 +24,12 @@ author:
   name: Michael Richardson
   org: Sandelman Software Works
   email: mcr+ietf@sandelman.ca
+
+- ins: W. Pan
+  name: Wei Pan
+  org: Huawei Technologies
+  email: william.panwei@huawei.com
+
 
 normative:
   BCP14: RFC8174
@@ -54,6 +60,41 @@ informative:
       org: "Wikipedia"
     target: "https://en.wikipedia.org/wiki/In-circuit_test#Bed_of_nails_tester"
     date: 2019
+
+  RambusCryptoManager:
+    title: "Qualcomm Licenses Rambus CryptoManager Key and Feature Management Security Solution"
+    target: "https://www.rambus.com/qualcomm-licenses-rambus-cryptomanager-key-and-feature-management-security-solution/"
+    author:
+      org: "Qualcomm press release"
+    date: 2014
+
+  kskceremony:
+    title: "DNSSEC Practice Statement for the Root Zone ZSK Operator"
+    target: "https://www.iana.org/dnssec/dps/zsk-operator/dps-zsk-operator-v2.0.pdf"
+    author:
+      org: "Verisign"
+    date: 2017
+
+  rootkeyceremony:
+     title: "Root Key Ceremony, Cryptography Wiki"
+     target: "https://cryptography.fandom.com/wiki/Root_Key_Ceremony"
+     author:
+       org: "Community"
+     date: "2020-04-04"
+
+  keyceremony2:
+     title: "SAS 70 Key Ceremony"
+     target: "http://www.digi-sign.com/compliance/key%20ceremony/index"
+     author:
+       org: "Digi-Sign"
+     date: "2020-04-04"i
+
+  nistsp800-57:
+    title: "SP 800-57 Part 1 Rev. 4 Recommendation for Key Management, Part 1: General"
+    target: "https://csrc.nist.gov/publications/detail/sp/800-57-part-1/rev-4/final"
+    author:
+      org: "NIST"
+    date: 2016-01-01
 
 --- abstract
 
@@ -92,7 +133,7 @@ this public key infrastructure.
 
 The second aspect is the use of the Manufacturer Authorized Signing Authority
 (MASA), as described in {{-BRSKI}} section 2.5.4.   The device needs to have
-the MASA anchor built in; the exact nature of the anchor is subject to a
+the MASA anchor built in; the exact nature of the anchor is subject to
 many possibilities.  The second section of this document deals with a number
 of options for architecting the security of the MASA relationship.
 
@@ -108,7 +149,7 @@ The manufacturer has the responsability to provision a keypair into each
 device as part of the manufacturing process.  There are a variety of
 mechanisms to accomplish this, which this document will overview.
 
-There are two fundamental ways to generate IDevID certificates for devices:
+There are three fundamental ways to generate IDevID certificates for devices:
 
 1) generating a private key on the device, creating a Certificate Signing
 Request (or equivalent), and then returning a certificate to the device.
@@ -116,7 +157,9 @@ Request (or equivalent), and then returning a certificate to the device.
 2) generating a private key outside the device, signing the certificate, and
 the installing both into the device.
 
-There is a third situation where the IDevID is provided as part of a Trusted
+3) deriving the private key from a previously installed secret seed, that is shared with only the manufacturer
+
+There is a fourth situation where the IDevID is provided as part of a Trusted
 Platform Module (TPM), in which case the TPM vendor may be making the same
 tradeoffs.  Or the mechanisms to install the certificate into the TPM will
 use TPM APIs.
@@ -127,70 +170,102 @@ mechanism.  This document recommends the use of ECDSA keys for the root
 and intermediate CAs, but there may be operational reasons why an RSA intermediate
 CA will be required for some legacy TPM equipment.
 
+## Key Generation process
 
-## On-device private key generation
+### On-device private key generation
 
 Generating the key on-device has the advantage that the private key never
-leaves the device.  The disadvantage is that the device may not have a
-verified random number generator.
+leaves the device.
+The disadvantage is that the device may not have a verified random number generator.
 
 There are a number of options of how to get the public key securely from the
-device to the certification authority.  This transmission must be done in an
-integral manner, and must be securely associated with the assigned serial
-number.  The serial number goes into the certificate, and the resulting
-certificate needs to be loaded into the manufacturer's asset database.
+device to the certification authority.
+This transmission must be done in an integral manner, and must be securely associated with the assigned serial number.
+The serial number goes into the certificate, and the resulting certificate needs to be loaded into the manufacturer's asset database.
 This asset database needs to be shared with the MASA.
 
-One way to do the transmission is during a manufacturing during a Bed of
-Nails (see {{BedOfNails}}) or Boundary Scan.   There are other ways that
-could be used where a certificate signing request is sent over a special
-network channel after the system has been started the first time.
-There are risks with these methods, as an attacker with physical access may
-be able to put device back into this mode afterwards.
+One way to do the transmission is during a manufacturing during a Bed of Nails (see {{BedOfNails}}) or Boundary Scan.
+There are other ways that could be used where a certificate signing request is sent over a special network channel when the device is powered up in the factory.
+After the key generation, the device needs to set a flag such that it no longer generates a new key, or will accept a new IDevID via the factory connection.
+This may be a software setting, or could be as dramatic as blowing a fuse.
 
-## Off-device private key generation
+There may be risks with this method if an attacker with physical access is able to put the device back into an unconfigured mode, particularly if this may permit the attacker to get access to the private key material.
+When done on a single device, such an attack may be able to replace the IDevID with one signed by another manufacturer.
+That does not result in a risk of counterfeit devices.
+An attack that is able to extract the private key could clone the device.
+
+### Off-device private key generation
 
 Generating the key off-device has the advantage that the randomness of the
-private key can be better analyzed.  As the private key is available to the
-manufacturing infrastructure, the authenticity of the public key is well
-known ahead of time.   A serial number for the device can be assigned and
-placed into a certificate.  The private key and certificate could be
-programmed into the device along with the initial bootloader firmware in a
-single step.
+private key can be better analyzed.
+As the private key is available to the manufacturing infrastructure, the authenticity of the public key is well known ahead of time.
+If the device does not come with a serial number in silicon, then one should be be assigned and placed into a certificate.
+The private key and certificate could be programmed into the device along with the initial bootloader firmware in a single step.
 
-The major downside to generating the private key off-device is that it could
-be seen by the manufacturing infrastructure.  This makes the manufacturing
-infrastructure a high-value attack target, so mechanisms that keep the
-private key secure within the manufacturing process, yet allow the device to
-get access to the private key would be adventageous.
+The major downside to generating the private key off-device is that it could be seen by the manufacturing infrastructure.
+This makes the manufacturing infrastructure a high-value attack target, so a mechanism is needed to keep the private key secure within the manufacturing process.
 
-Per-device keys would be ideal, but that would require that an individual
-per-device key be provisioned in seperately.  An alternate mechanism would be
-that a constant decryption key is kept in the firmware, but this provides
-little protection against an attack on the manufacturing infrastructure
-unless the firmware is loaded in a completely different place than the
-keypair.
+Encrypting the private key would solve this, but then the symmetric key would
+need to be shared with the device, which is back to the original problem.
+
+If keys are generated by the manufacturing plant, and are immediately installed, but never stored, then the window in which an attacker can gain access to the private key is immensely reduced.
+
+### Key setup based on 256-bit secret seed
+
+A hybrid of the previous two methods leverages a symmetric key that is often provided by a silicon vendor to OEM manufacturers.
+Each CPU (or a Trusted Execution Environment {{?I-D.ietf-teep-architecture}}, or a TPM) is provisioned at fabrication time with a unique, secret seed, usually at least 256-bits in size.
+
+This value is revealed to the OEM board manufacturer only via a secure channel.
+Upon first boot, the system (probably within a TEE, or within a TPM) will generate a key pair using the seed to initialize a Pseudo-Random-Number-Generator (PRNG).
+The OEM, in a separate system, will initialize the same PRNG and generate the same key pair.
+The OEM then derives the public key part, signs it and turns it into a certificate.
+The private part is then destroyed, ideally never stored or seen by anyone.
+The certificate (being public information) is placed into a database, in some cases it is loaded by the device as its IDevID certificate, in other cases, it is retrieved during the onboarding process based upon a unique serial number asserted by the device.
+
+This method appears to have all of the downsides of the previous two methods: the device must correctly derive its own private key, and the OEM has access to the private key, making it also vulnerable.
+The secret seed must be created in a secure way and it must also be communicated securely.
+
+There are some advantages to the OEM however: the major one is that the problem of securely communicating with the device is outsourced to the silicon vendor.
+The private keys and certificates may be calculated by the OEM asynchronously to the manufacturing process, either done in batches in advance of actual manufacturing, or on demand when an IDevID is demanded.
+Doing the processing in this way permits the key derivation system to be completely disconnected from any network, and requires placing very little trust in the system assembly factory.
+Operational security such as often incorrectly presented fictionalized stories of a "mainframe" system to which only physical access is permitted begins to become realistic.
+That trust has been replaced with a heightened trust placed in the silicon (integrated circuit) fabrication facility.
+
+The downsides of this method to the OEM are: they must be supplied by a trusted silicon fabrication system, which must communicate the set of secrets seeds to the OEM in batches, and they OEM must store and care for these keys very carefully.
+There are some operational advantages to keeping the secret seeds around in some form, as the same secret seed could be used for other things.
+There are some significant downsides to keeping that secret seed around.
 
 ## Public Key infrastructure for IDevID
 
-A three-tier PKI infrastructure is appropriate.  This entails having a root CA created with the key kept offline, and a number of intermediate CAs that have online keys that issue "day-to-day" certificates.
+A three-tier PKI infrastructure is appropriate.
+This entails having a root CA created with the key kept offline, and a number of intermediate CAs that have online keys that issue "day-to-day" certificates.
 
-The root private key should be kept offline, quite probably in a Hardware Security Module if financially feasible.  If not, then it should be secret-split across seven to nine people,
-with a threshold of four to five people.  The split secrets should be kept in geographically diverse places if the manufacturer has operations in multiple places.
+The root private key should be kept offline, quite probably in a Hardware Security Module if financially feasible.
+If not, then it should be secret-split across seven to nine people, with a threshold of four to five people.
+The split secrets should be kept in geographically diverse places if the manufacturer has operations in multiple places.
+For examples of extreme measures, see {{kskceremony}}.
+There is however a wide spectrum of needs, as exampled in {{rootkeyceremony}}.
+The SAS70 audit standard is usually used as a basis for the Ceremony, see {{keyceremony2}}.
 
-Ongoing access to the root-CA is important, but not as critical as access to the MASA
-key.
+Ongoing access to the root-CA is important, but not as critical as access to the MASA key.
 
 The root CA is then used to sign a number of intermediate entities.
-If manufacturing occurs in multiple factories, then an intermediate CA for each factory is appropriate.  It is also reasonable to use different intermediate CAs for different product lines.   It may also be valuable to split IDevID certificates across intermediate CAs
-in a round-robin fashion for products with high volumes.
+If manufacturing occurs in multiple factories, then an intermediate CA for each factory is appropriate.
+It is also reasonable to use different intermediate CAs for different product lines.
+It may also be valuable to split IDevID certificates across intermediate CAs in a round-robin fashion for products with high volumes.
 
-Cycling the intermediate CAs after a period of a few months or so is a quite reasonable strategy.  The intermediate CAs private key may be destroyed after it signed some number
-of IDevIDs, and a new key generated.  The IDevID certificates have very long (ideally infinite) validity lifetimes for reasons that {{ieee802-1AR}} explains, but once the certificates have been created the intermediate CA has no further obligations as neither
-CRLs nor OCSP are appropriate.
+Cycling the intermediate CAs after a period of a few months or so is a quite reasonable strategy.
+The intermediate CAs private key may be destroyed after it signed some number of IDevIDs, and a new key generated.
+The IDevID certificates have very long (ideally infinite) validity lifetimes for reasons that {{ieee802-1AR}} explains.
+The intermediate CA will have a private key, likely kept online, which is used to sign each generated IDevID. Once the IDevID are created, the private key is no longer needed and can either be destroyed, or taken offline.
+In other CAs, the intermediate CA's private key (or another designated key) is often needed to sign OCSP {{?RFC6960}} or CRLS {{?RFC5280}}.
+As the IDevID process does not in general support revocation, keeping such keys online is not necessary.
+{EDIT NOTE: REVIEW of this NEEDED}
 
-In all cases the serialNumber embedded in the certificate must be unique across all products produced by the manufacturer.  This suggests some amount of structure to the serialNumber,
-such that different intermediate CAs do not need to coordinate when issuing certificates.
+The intermediate CA certificate SHOULD be signed by the root-CA with indefinite (notAfter: 99991231) duration as well.
+
+In all cases the serialNumber embedded in the certificate must be unique across all products produced by the manufacturer.
+This suggests some amount of structure to the serialNumber, such that different intermediate CAs do not need to coordinate when issuing certificates.
 
 # Operational Considerations for Manufacturer Authorized Signing Authority (MASA)
 
@@ -222,7 +297,8 @@ denial of service (DDoS) attacks that affect all tenants of that data
 center.
 Consideration should be given to the use of a cloud front end to mitigate
 attacks, however, such a system needs to be able to securely transmit the TLS
-Client Certificates, it the MASA wants to do supply chain integration.
+Client Certificates, if the MASA wants to identify Registrars at the TLS
+connection time.
 
 The middle (application) tier needs to be scalable, but it is unlikely that
 it needs to scale very much on a per-minute or even per-hour basis.
@@ -237,27 +313,31 @@ database.
 Direct integration with a sales system could be considered, but would involve
 a more significant security impact analysis.
 
-In any case, the manufacturer SHOULD plan for a situation where the manufacturer is no longer able or interested in running the Authority: this does not have to an unhappy situation of the manufacturer going out of business.  It could be a happy event where the manufacturer goes through a merge or acquisition and it makes sense to consolidate the
-Signing Authority in another part of the organziation.
+In any case, the manufacturer SHOULD plan for a situation where the manufacturer is no longer able or interested in running the Authority: this does not have to an unhappy situation of the manufacturer going out of business.
+It could be a happy event where the manufacturer goes through a merge or acquisition and it makes sense to consolidate the Signing Authority in another part of the organziation.
 
-A plan to escrow the signing keys SHOULD be detailed, and it is likely that customers will want to review it for high-value products.
+Business continuity plan should include backing up the voucher signing keys.
+This may involve multiple Hardware Security Modules, and secret splitting mechanisms
+SHOULD be employed.
+For large value items, customers are going to need to review the plan as part of their contingency audits.
 
 The anchors for the MASA need to be "baked-in" to the device firmware so that they
-are always available to validate vouchers.  In order to avoid locking down a single
-validation key, a PKI infrastructure is appropriate.  Note that constrained devices without code space to parse and validate a public key certificate chain require different
-considerations, and this document does not (yet) provide that consideration.
+are always available to validate vouchers.
+In order to avoid locking down a single validation key, a PKI infrastructure is appropriate.
+Note that constrained devices without code space to parse and validate a public key certificate chain require different considerations, and this document does not (yet) provide that consideration.
 
 There are many ways to construct a resilient PKI to sign vouchers.
 
 ## Self-contained multi-product MASA
 
 The most obvious is to just create a new offline CA, have it periodically sign
-a new End-Entity (EE) Certificate with an online private key, and use that to sign voucher
-requests.  The entity used to sign {{RFC8366}} format vouchers does not need to be
+a new End-Entity (EE) Certificate with an online private key, and use that to sign voucher requests.
+The entity used to sign {{RFC8366}} format vouchers does not need to be
 a certificate authority.
 
 The public key of the offline CA is then built-in to the firmware of the device, providing
-a trust anchor with with to validate vouchers.  In addition, the DN of the
+a trust anchor with with to validate vouchers.  
+In addition, the DN of the
 appropriate End-Entity certificate needs to built-in to the device, otherwise
 a voucher created for one product could be used to sign a voucher for another
 product.
@@ -271,7 +351,8 @@ this permits auditing elements in a Registrar to validate the End-Entity Certifi
 
 The inclusion of the full chain also supports a Trust-on-First-Use (TOFU) workflow for the manager of the Registrar: they can see the trust anchor chain and can compare a fingerprint displayed on their screen with one that could be included in packaging or other sales channel information.
 
-When building the MASA public key into a device, only the public key contents matter, not the structure of the self-signed certificate itself.  Using only the public key enables a MASA architecture to evolve from a single self-contained system into a more complex architecture later on.
+When building the MASA public key into a device, only the public key contents matter, not the structure of the self-signed certificate itself.
+Using only the public key enables a MASA architecture to evolve from a single self-contained system into a more complex architecture later on.
 
 ## Self-contained per-product MASA {#perproduct}
 
@@ -281,8 +362,9 @@ A simple enhancement to the previous scenario is to have a unique MASA offline k
 * if a product line is sold to another entity, or if it has to go through an escrow process due to the product going out of production, then the process affects only a single product line.
 * it is safe to have serialNumber duplicated among different product lines since a voucher for one product line would not validate on another product line.
 
-The disadvantage is that it requires a private key to be stored per product line, and most large OEMs have many dozens of product lines.  If the keys are stored in a single Hardware Security Module (HSM), with the access to it split across the same parties, then some of the cryptographic advantages of different private keys goes away, as a compromise of one key
-likely compromises them all.  Given a HSM, the most likely way a key is compromised is by an attacker getting authorization on the HSM through theft or coercion.
+The disadvantage is that it requires a private key to be stored per product line, and most large OEMs have many dozens of product lines.
+If the keys are stored in a single Hardware Security Module (HSM), with the access to it split across the same parties, then some of the cryptographic advantages of different private keys goes away, as a compromise of one key likely compromises them all.
+Given a HSM, the most likely way a key is compromised is by an attacker getting authorization on the HSM through theft or coercion.
 
 The use of per-product MASA signing keys is encouraged.
 
@@ -290,13 +372,21 @@ The use of per-product MASA signing keys is encouraged.
 
 The IDevID certificate chain (the intermediate CA and root CA that signed the IDevID certificate) should be included in the device firmware so that they can be communicated during the BRSKI-EST exchange.
 
-Since they are already present, why not use of them as the MASA trust anchor?
+Since they are already present, could they be used as the MASA trust anchor as well?
 
-A voucher needs to be signed by recognized End-Entity, which has been authorized to be a voucher signer.  The challenge with combining it into the IDevID PKI is making sure that only an authorized entity can sign the vouchers.  This suggests that it can not be the
-same intermediate CA that is used to sign the IDevID, since that CA should have the
-authority to sign vouchers. If it did, then the End-Entities that it created, the IDevID for devices, would then be able to sign vouchers, which would not be an appropriate authorization.
+In order to do this there is an attack that needs to mitigated.
+Since the root-CA that creates IDevIDs and the root-CA that creates vouchers are the same, when validating a voucher, a pledge needs to make sure that it is signed by a key authorized to sign vouchers.
+In other scenarios any key signed by the voucher-signing-root-CA would be valid, but in this scenario that would also include any IDevID, such as would be installed in any other device.
+Without an additional signal as to which keys can sign vouchers, and which keys are just IDevID keys, then it would be possible to sign vouchers with any IDevID private key, rather than just the designated voucher-signing key.
+An attacker that could extract a private key from even one instance of a product, could use that to sign vouchers, and impersonate the MASA.
 
-The PKI root CA therefore needs to sign an intermediate CA, or End-Entity certificate with an extension OID that is specific for Voucher Authorization.  This is easy to do as policy OIDs can be created from Private Enterprise Numbers.  There is no need for standardization, as the entity doing the signing is also creating the verification code.  If the entire PKI operation was outsource, then there would be a benefit for standardization.
+The challenge with combining it into the IDevID PKI is making sure that only an authorized entity can sign the vouchers.
+The solution is that it can not be the same intermediate CA that is used to sign the IDevID, since that CA should have the authority to sign vouchers.
+
+The PKI root CA therefore needs to sign an intermediate CA, or End-Entity certificate with an extension OID that is specific for Voucher Authorization.
+This is easy to do as policy OIDs can be created from Private Enterprise Numbers.
+There is no need for standardization, as the entity doing the signing is also creating the verification code.
+If the entire PKI operation was outsource, then there would be a benefit for standardization.
 
 ## Rotating MASA authorization keys {#rotatingkeys}
 
