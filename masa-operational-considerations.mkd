@@ -3,18 +3,14 @@ title: IDevID, MASA and Voucher considerations for BRSKI infrastructure
 abbrev: MASA Considerations
 docname: draft-richardson-anima-masa-considerations-03
 
-# stand_alone: true
-
 ipr: trust200902
 area: Internet
 wg: anima Working Group
 kw: Internet-Draft
 cat: std
 
-coding: us-ascii
-pi:    # can use array (if all yes) or hash here
+pi:
   toc: yes
-  sortrefs:   # defaults to yes
   symrefs: yes
 
 author:
@@ -87,7 +83,7 @@ informative:
      target: "http://www.digi-sign.com/compliance/key%20ceremony/index"
      author:
        org: "Digi-Sign"
-     date: "2020-04-04"i
+     date: "2020-04-04"
 
   nistsp800-57:
     title: "SP 800-57 Part 1 Rev. 4 Recommendation for Key Management, Part 1: General"
@@ -336,7 +332,7 @@ The entity used to sign {{RFC8366}} format vouchers does not need to be
 a certificate authority.
 
 The public key of the offline CA is then built-in to the firmware of the device, providing
-a trust anchor with with to validate vouchers.  
+a trust anchor with with to validate vouchers.
 In addition, the DN of the
 appropriate End-Entity certificate needs to built-in to the device, otherwise
 a voucher created for one product could be used to sign a voucher for another
