@@ -19,15 +19,16 @@ author:
   org: Sandelman Software Works
   email: mcr+ietf@sandelman.ca
 
-- ins: W. Pan
-  name: Wei Pan
+- ins: Jie Yang
+  name: Jie Yang
   org: Huawei Technologies
-  email: william.panwei@huawei.com
+  email: jay.yang@huawei.com
 
 
 normative:
   BCP14: RFC8174
   RFC8366:
+  I-D.ietf-secdispatch-idevid-considerations
   I-D.ietf-anima-constrained-voucher: constrainedvoucher
   I-D.ietf-anima-bootstrapping-keyinfra: BRSKI
   I-D.richardson-anima-registrar-considerations:
@@ -121,14 +122,14 @@ each aspect.
 This document offers a number of operational considerations for each aspect.
 
 The first aspect is the device identity in the form of an {{ieee802-1AR}}
-certificate that is installed at manufacturing time in the device.  The first
-section of this document deals with operational considerations of building
-this public key infrastructure.
+certificate that is installed at manufacturing time in the device. 
+The operational considerations of building this public key infrastructure described 
+in {{I-D.ietf-secdispatch-idevid-considerations}}.
 
 The second aspect is the use of the Manufacturer Authorized Signing Authority
 (MASA), as described in {{-BRSKI}} section 2.5.4.   The device needs to have
 the MASA anchor built in; the exact nature of the anchor is subject to
-many possibilities.  The second section of this document deals with a number
+many possibilities. This document primarily deals with a number
 of options for architecting the security of the MASA relationship.
 
 There are some additional considerations for a MASA that deals with
@@ -206,12 +207,10 @@ The entity used to sign {{RFC8366}} format vouchers does not need to be
 a certificate authority.
 
 The public key of the offline CA is then built-in to the firmware of the device, providing
-a trust anchor with with to validate vouchers.
-In addition, the DN of the
+a trust anchor to validate vouchers. In addition, the DN of the
 appropriate End-Entity certificate needs to built-in to the device, otherwise
 a voucher created for one product could be used to sign a voucher for another
-product.
-This situation is also mitigated by never repeating serialNumbers across
+product. This situation is also mitigated by never repeating serialNumbers across
 product lines.
 
 An End-Entity certificate used to sign the
@@ -233,7 +232,7 @@ A simple enhancement to the previous scenario is to have a unique MASA offline k
 * it is safe to have serialNumber duplicated among different product lines since a voucher for one product line would not validate on another product line.
 
 The disadvantage is that it requires a private key to be stored per product line, and most large OEMs have many dozens of product lines.
-If the keys are stored in a single Hardware Security Module (HSM), with the access to it split across the same parties, then some of the cryptographic advantages of different private keys goes away, as a compromise of one key likely compromises them all.
+If the keys are stored in a single Hardware Security Module (HSM), with the access to it split across the same parties, then some of the cryptographic advantages of different private keys will go away, as a compromise of one key likely compromises them all.
 Given a HSM, the most likely way a key is compromised is by an attacker getting authorization on the HSM through theft or coercion.
 
 The use of per-product MASA signing keys is encouraged.
