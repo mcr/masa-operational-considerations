@@ -21,7 +21,7 @@ author:
 
 - ins: Jie Yang
   name: Jie Yang
-  org: Huawei Technologies
+  org: Huawei Technologies Co., Ltd.
   email: jay.yang@huawei.com
 
 
