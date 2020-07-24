@@ -28,7 +28,7 @@ author:
 normative:
   BCP14: RFC8174
   RFC8366:
-  I-D.ietf-secdispatch-idevid-considerations
+  I-D.richardson-secdispatch-idevid-considerations:
   I-D.ietf-anima-constrained-voucher: constrainedvoucher
   I-D.ietf-anima-bootstrapping-keyinfra: BRSKI
   I-D.richardson-anima-registrar-considerations:
@@ -124,7 +124,7 @@ This document offers a number of operational considerations for each aspect.
 The first aspect is the device identity in the form of an {{ieee802-1AR}}
 certificate that is installed at manufacturing time in the device.
 The operational considerations of building this public key infrastructure described
-in {{I-D.ietf-secdispatch-idevid-considerations}}.
+in {{I-D.richardson-secdispatch-idevid-considerations}}.
 
 The second aspect is the use of the Manufacturer Authorized Signing Authority
 (MASA), as described in {{-BRSKI}} section 2.5.4.   The device needs to have
