@@ -1,7 +1,7 @@
 ---
 title: Operatonal Considerations for Voucher infrastructure for BRSKI MASA
 abbrev: MASA Considerations
-docname: draft-richardson-anima-masa-considerations-04
+docname: draft-richardson-anima-masa-considerations-05
 
 ipr: trust200902
 area: Internet
@@ -122,8 +122,8 @@ each aspect.
 This document offers a number of operational considerations for each aspect.
 
 The first aspect is the device identity in the form of an {{ieee802-1AR}}
-certificate that is installed at manufacturing time in the device. 
-The operational considerations of building this public key infrastructure described 
+certificate that is installed at manufacturing time in the device.
+The operational considerations of building this public key infrastructure described
 in {{I-D.ietf-secdispatch-idevid-considerations}}.
 
 The second aspect is the use of the Manufacturer Authorized Signing Authority
