@@ -26,9 +26,8 @@ author:
 
 
 normative:
-  BCP14: RFC8174
   RFC8366:
-  I-D.richardson-secdispatch-idevid-considerations:
+  I-D.richardson-t2trg-idevid-considerations:
   I-D.ietf-anima-constrained-voucher: constrainedvoucher
   I-D.ietf-anima-bootstrapping-keyinfra: BRSKI
   I-D.richardson-anima-registrar-considerations:
@@ -116,27 +115,23 @@ manufacturer (the IDevID), and a mechanism which convinces the device to
 trust the new owner (the {{RFC8366}} voucher).
 
 The manufacturer, or their designate, is involved in both aspects of this
-process.  This requires the manufacturer to operate a significant process for
-each aspect.
+process.  This requires the manufacturer (or designate) to maintain on online presence.
 
-This document offers a number of operational considerations for each aspect.
+This document offers a number of operational considerations recommendations.
 
 The first aspect is the device identity in the form of an {{ieee802-1AR}}
 certificate that is installed at manufacturing time in the device.
-The operational considerations of building this public key infrastructure described
-in {{I-D.richardson-secdispatch-idevid-considerations}}.
+Some of the background for the operational considerations of building this public key infrastructure is described in {{I-D.richardson-t2trg-idevid-considerations}}.
 
 The second aspect is the use of the Manufacturer Authorized Signing Authority
 (MASA), as described in {{-BRSKI}} section 2.5.4.   The device needs to have
-the MASA anchor built in; the exact nature of the anchor is subject to
-many possibilities. This document primarily deals with a number
-of options for architecting the security of the MASA relationship.
+the MASA anchor built in; the exact nature of the anchor is open to a number of 
+possibilities which are explained in this document.
+This document primarily deals with a number of options for architecting the security of the MASA relationship.
 
 There are some additional considerations for a MASA that deals with
-constrained vouchers as described in
-{{I-D.ietf-anima-constrained-voucher}}. In particular in the COSE signed
-version, there are no PKI structure included in the voucher mechanism, so
-cryptographic hygiene needs a different set of tradeoffs.
+constrained vouchers as described in {{I-D.ietf-anima-constrained-voucher}}. 
+In particular in the COSE signed version, there may be no PKI structure included in the voucher mechanism, so cryptographic hygiene needs a different set of tradeoffs.
 
 # Operational Considerations for Manufacturer Authorized Signing Authority (MASA)
 
