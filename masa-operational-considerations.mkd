@@ -141,27 +141,31 @@ assumes that the manufacturer will provide this Authority internally, but
 subsequent sections deal with some adjustments when the authority is
 externally run.
 
-The MASA is a public facing web system.  It will be subject to loads from
+The MASA is a public facing web system.  It will be subject to network load from
 legitimate users when a network is bootstrapped for the first time.
 The legitimate load will be proportional to sales.
 
-The MASA will be subject to a malicious load: the best way to deflect
-unwanted users is to require TLS Client Certificates for all connections,
-even if the TLS Certificate is not validated.
-This increases the effort requires for attackers, and if they repeat the same
-certificate then it becomes easier to reject such attackers earlier.
+The MASA will also be subject to a malicious load: a way to deflect
+unwanted users from the application framework backend is to require TLS Client Certificates for  all connections.
+This offloads much of the defense to what is typically a hardware TLS termination system.
+This can be effective even if the hardware is unable to validate the TLS Client Certificate is not validated.
+This increases the effort requires for attackers, and if they repeat the same certificate then it becomes easier to reject such attackers earlier.
 The use of this certificate forces attackers to generate new key pairs and certificates each time.
-The accompanying document
-{{I-D.richardson-anima-registrar-considerations}} recommends in section
-5.2.1 recommends the use of a public anchor, or an anchor that is known to
-the MASA.
+The accompanying document {{I-D.richardson-anima-registrar-considerations}} recommends in section
+5.2.1 recommends the use of a public anchor, or an anchor that is known to the MASA.
+{{?I-D.bdc-something-something-certificate-04}} is an example of how hardware terminations devices support TLS Client certificates.
 
-Web framework three-tier mechanisms are the most obvious. See {{threetier}} for an overview.
+Web framework three-tier mechanisms are a very common architecture. 
+See {{threetier}} for an overview.
+There are Internet scale frameworks exist for Ruby (RubyOnRails), Python (Django), Java (J2EE),  GO, PHP and others.
+The methods of deploying them and dealing with expected scale are common in most enterprise IT departments. 
+
 Consideration should be made to deploying the presentation layer into
 multiple data centers in order to provide resiliency against distributed
 denial of service (DDoS) attacks that affect all tenants of that data
 center.
-Consideration should be given to the use of a cloud front end to mitigate
+
+Consideration should also be given to the use of a cloud front end to mitigate
 attacks, however, such a system needs to be able to securely transmit the TLS
 Client Certificates, if the MASA wants to identify Registrars at the TLS
 connection time.
@@ -172,38 +176,61 @@ It is probably easier and more reliable to have application tiers do database
 operations across the Internet or via VPN to a single location database
 cluster than it is to handle asynchronous database operations resulting from
 geographically dispersed multi-master database systems.
-The assets tables that the MASA needs scale linearly with the number of
-products sold.
-Many columns could be replicated in a read-only manner from a sales
-database.
+
+But, these are local design decisions which web deployment make on a regular basis.
+
+The assets tables that the MASA needs scale linearly with the number of products sold.
+
+Many columns could be replicated in a read-only manner from a sales database.
+
 Direct integration with a sales system could be considered, but would involve
 a more significant security impact analysis.
 
-In any case, the manufacturer SHOULD plan for a situation where the manufacturer is no longer able or interested in running the Authority: this does not have to an unhappy situation of the manufacturer going out of business.
-It could be a happy event where the manufacturer goes through a merge or acquisition and it makes sense to consolidate the Signing Authority in another part of the organziation.
+In any case, the manufacturer SHOULD plan for a situation where the manufacturer is no longer able or interested in running the Authority: this does not have to an unhappy situation!
+While the case of the manufacturer going out of business is discussed in {{escrow}},
+there are more happy events which should be prepared for.
+For instance, if a manufacturer goes through a merge or acquisition and it makes sense to consolidate the Signing Authority in another part of the organization.
 
 Business continuity plan should include backing up the voucher signing keys.
 This may involve multiple Hardware Security Modules, and secret splitting mechanisms
 SHOULD be employed.
-For large value items, customers are going to need to review the plan as part of their contingency audits.
+For large value items, customers are going to need to review the plan as part of their contingency audits.  
+The document {{I-D.richardson-t2trg-idevid-considerations}} can provide some common basis for this kind of evaluation.
 
-The anchors for the MASA need to be "baked-in" to the device firmware so that they
-are always available to validate vouchers.
-In order to avoid locking down a single validation key, a PKI infrastructure is appropriate.
-Note that constrained devices without code space to parse and validate a public key certificate chain require different considerations, and this document does not (yet) provide that consideration.
+The trust anchors needs to validate {{RFC8366}} vouchers will typically be part of the firmware loaded inot the devie firmware.
 
-There are many ways to construct a resilient PKI to sign vouchers.
+There are many models to manage these trust anchors, but in order having only a single
+key, a PKI infrastructure is appropriate, but not required.
 
-## Self-contained multi-product MASA
+On constrained devices without code space to parse and validate a public key certificate chain require different considerations, a single key may be necessary.  
+This document does not (yet) provide appropriate considerations for that case.
 
-The most obvious is to just create a new offline CA, have it periodically sign
-a new End-Entity (EE) Certificate with an online private key, and use that to sign voucher requests.
-The entity used to sign {{RFC8366}} format vouchers does not need to be
-a certificate authority.
+What follows are a number of ways to construct a resilient PKI to sign vouchers.
 
-The public key of the offline CA is then built-in to the firmware of the device, providing
-a trust anchor to validate vouchers. In addition, the DN of the
-appropriate End-Entity certificate needs to built-in to the device, otherwise
+## Self-contained multi-product MASA, no PKI
+
+## Self-contained multi-product MASA, with one-level PKI
+
+A simple way is to create an new offline certification authority (CA), have it periodically sign a new End-Entity (EE) identity's certificate.
+This End-Entity identity should have an online private key, and use that to sign voucher requests.
+Note that the entity used to sign {{RFC8366}} format vouchers does not need to be a certificate authority.
+
+If the public key of this offline CA is then built-in to the firmware of the device,
+then the devices do not need any further anchors. 
+
+There is no requirement for this CA to be signed by any other certification authority.  
+That is, it may be a root CA.
+There is also no prohibition against it.
+
+If the offline CA signs any other certificates, then it is important that the device know which End-Entity certificates may sign vouchers.  
+This is an authorization step, and it may be accomplished it a number of ways:
+
+1. the Distinguished Name (DN) of the appropriate End-Entity certificate can be built-in to the firmware
+
+2. a particular policy OID may be included in certificates intended to sign vouchers
+
+
+
 a voucher created for one product could be used to sign a voucher for another
 product. This situation is also mitigated by never repeating serialNumbers across
 product lines.
