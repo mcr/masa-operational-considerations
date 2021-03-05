@@ -153,7 +153,6 @@ This increases the effort requires for attackers, and if they repeat the same ce
 The use of this certificate forces attackers to generate new key pairs and certificates each time.
 The accompanying document {{I-D.richardson-anima-registrar-considerations}} recommends in section
 5.2.1 recommends the use of a public anchor, or an anchor that is known to the MASA.
-{{?I-D.bdc-something-something-certificate-04}} is an example of how hardware terminations devices support TLS Client certificates.
 
 Web framework three-tier mechanisms are a very common architecture. 
 See {{threetier}} for an overview.
