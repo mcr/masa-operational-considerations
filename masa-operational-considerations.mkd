@@ -90,6 +90,21 @@ informative:
       org: "NIST"
     date: 2016-01-01
 
+  iso22301_2019:
+    title: "ISO 22301: Societal security — Business continuity management systems — Requirements"
+    target: "https://www.iso.org/standard/75106.html"
+    author:
+      org: "ISO"
+    date: 2019-01-01
+
+  holman2012:
+    title: "A Business Continuity Solution Selection Methodology"
+    target: "https://share.confex.com/share/118/webprogram/Handout/Session10387/Session%2010387%20Business%20Continuity%20Soloution%20Selection%20Methodology%2003-7-2012.pdf"
+    author:
+      org: "IBM Corp"
+      name: "Ellis Holman"
+    date: 2012-03-13
+
 --- abstract
 
 This document describes a number of operational modes that a
@@ -125,12 +140,12 @@ Some of the background for the operational considerations of building this publi
 
 The second aspect is the use of the Manufacturer Authorized Signing Authority
 (MASA), as described in {{-BRSKI}} section 2.5.4.   The device needs to have
-the MASA anchor built in; the exact nature of the anchor is open to a number of 
+the MASA anchor built in; the exact nature of the anchor is open to a number of
 possibilities which are explained in this document.
 This document primarily deals with a number of options for architecting the security of the MASA relationship.
 
 There are some additional considerations for a MASA that deals with
-constrained vouchers as described in {{I-D.ietf-anima-constrained-voucher}}. 
+constrained vouchers as described in {{I-D.ietf-anima-constrained-voucher}}.
 In particular in the COSE signed version, there may be no PKI structure included in the voucher mechanism, so cryptographic hygiene needs a different set of tradeoffs.
 
 # Operational Considerations for Manufacturer Authorized Signing Authority (MASA)
@@ -154,10 +169,10 @@ The use of this certificate forces attackers to generate new key pairs and certi
 The accompanying document {{I-D.richardson-anima-registrar-considerations}} recommends in section
 5.2.1 recommends the use of a public anchor, or an anchor that is known to the MASA.
 
-Web framework three-tier mechanisms are a very common architecture. 
+Web framework three-tier mechanisms are a very common architecture.
 See {{threetier}} for an overview.
 There are Internet scale frameworks exist for Ruby (RubyOnRails), Python (Django), Java (J2EE),  GO, PHP and others.
-The methods of deploying them and dealing with expected scale are common in most enterprise IT departments. 
+The methods of deploying them and dealing with expected scale are common in most enterprise IT departments.
 
 Consideration should be made to deploying the presentation layer into
 multiple data centers in order to provide resiliency against distributed
@@ -193,7 +208,7 @@ For instance, if a manufacturer goes through a merge or acquisition and it makes
 Business continuity plan should include backing up the voucher signing keys.
 This may involve multiple Hardware Security Modules, and secret splitting mechanisms
 SHOULD be employed.
-For large value items, customers are going to need to review the plan as part of their contingency audits.  
+For large value items, customers are going to need to review the plan as part of their contingency audits.
 The document {{I-D.richardson-t2trg-idevid-considerations}} can provide some common basis for this kind of evaluation.
 
 The trust anchors needs to validate {{RFC8366}} vouchers will typically be part of the firmware loaded inot the devie firmware.
@@ -201,7 +216,7 @@ The trust anchors needs to validate {{RFC8366}} vouchers will typically be part 
 There are many models to manage these trust anchors, but in order having only a single
 key, a PKI infrastructure is appropriate, but not required.
 
-On constrained devices without code space to parse and validate a public key certificate chain require different considerations, a single key may be necessary.  
+On constrained devices without code space to parse and validate a public key certificate chain require different considerations, a single key may be necessary.
 This document does not (yet) provide appropriate considerations for that case.
 
 What follows are a number of ways to construct a resilient PKI to sign vouchers.
@@ -215,13 +230,13 @@ This End-Entity identity should have an online private key, and use that to sign
 Note that the entity used to sign {{RFC8366}} format vouchers does not need to be a certificate authority.
 
 If the public key of this offline CA is then built-in to the firmware of the device,
-then the devices do not need any further anchors. 
+then the devices do not need any further anchors.
 
-There is no requirement for this CA to be signed by any other certification authority.  
+There is no requirement for this CA to be signed by any other certification authority.
 That is, it may be a root CA.
 There is also no prohibition against it.
 
-If the offline CA signs any other certificates, then it is important that the device know which End-Entity certificates may sign vouchers.  
+If the offline CA signs any other certificates, then it is important that the device know which End-Entity certificates may sign vouchers.
 This is an authorization step, and it may be accomplished it a number of ways:
 
 1. the Distinguished Name (DN) of the appropriate End-Entity certificate can be built-in to the firmware
@@ -304,6 +319,24 @@ TBD
 # Operational Considerations for creating Nonceless vouchers
 
 TBD
+
+# Business Continuity and Escow Considerations {#escrow}
+
+A number of jurisdictions have legal requirements for businesses to have contingency plans in order to continue operating after an incident or disaster.  Specifications include {{iso22301_2019}}, but the problem of continuity goes back over 40 years.
+
+The {{holman2012}} document defined an eight tier process to understand how data would be backed up.
+Tier 0 is "no off-site data", and would be inappropriate for the MASA's signing key.
+The question as to how much delay (downtime) is tolerable during a disaster for activating new devices.
+The consideration should depend upon the type of the device, and what kind of disasters are being planned for.
+Given current technologies for replicating databases online, a tier-4 ("Point-in-time copies")
+or better solution may be quite economically deployed.
+
+A key aspect of the MASA is that it was designed as a component that can be outsourced to a third party, and this third party can leverage economies of scale to provide more resilient systems at much lower costs.
+
+The PKI components that are used to provision the IDevID certificiates into new devices need to be operational only when the factory that produces the devices is active.
+The business continuity planning needs to include provision for backing up the private keys used within the PKI.
+It may be enough to backup just the root CA key: the rest of the levels of the PKI can be regenerated in another location if necessary.
+
 
 # Privacy Considerations
 
