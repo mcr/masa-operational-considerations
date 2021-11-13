@@ -1,7 +1,7 @@
 ---
 title: Operatonal Considerations for Voucher infrastructure for BRSKI MASA
 abbrev: MASA Considerations
-docname: draft-richardson-anima-masa-considerations-05
+docname: draft-richardson-anima-masa-considerations-06
 
 ipr: trust200902
 area: Internet
@@ -19,17 +19,16 @@ author:
   org: Sandelman Software Works
   email: mcr+ietf@sandelman.ca
 
-- ins: J. Yang
-  name: Jie Yang
-  org: Huawei Technologies Co., Ltd.
-  email: jay.yang@huawei.com
-
+- ins: W. Pan
+  name: Wei Pan
+  org: Huawei Technologies
+  email: william.panwei@huawei.com
 
 normative:
   RFC8366:
   I-D.richardson-t2trg-idevid-considerations:
   I-D.ietf-anima-constrained-voucher: constrainedvoucher
-  I-D.ietf-anima-bootstrapping-keyinfra: BRSKI
+  RFC8995: BRSKI
   I-D.richardson-anima-registrar-considerations:
   I-D.moskowitz-ecdsa-pki:
   threetier:
@@ -119,7 +118,7 @@ protocol mechanisms.
 
 # Introduction
 
-{{I-D.ietf-anima-bootstrapping-keyinfra}} introduces a mechanism for
+{{-BRSKI}} introduces a mechanism for
 new devices (called pledges) to be onboarded into a network without
 intervention from an expert operator.
 
