@@ -164,7 +164,7 @@ The MASA will also be subject to a malicious load.
 ## Deflecting unwanted TLS traffic with Client Certificates
 
 One way to deflect unwanted users from the application framework backend is to require TLS Client Certificates for  all connections.
-As described in {{Section 5.5.4 of -BRSKI}}, the Registrar may be authenticated with a TLS Client Certificate.
+As described in Section 5.5.4 of {{-BRSKI}}, the Registrar may be authenticated with a TLS Client Certificate.
 
 This offloads much of the defense to what is typically a hardware TLS termination system.
 This can be effective even if the hardware is unable to do the actual validation of the TLS Client Certificate, as validation of the certificate occurs prior to any communication with the application server.
