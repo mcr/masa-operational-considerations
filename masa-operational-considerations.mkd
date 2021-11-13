@@ -131,7 +131,7 @@ trust the new owner (the {{RFC8366}} voucher).
 The manufacturer, or their designate, is involved in both aspects of this
 process.  This requires the manufacturer (or designate) to maintain on online presence.
 
-This document offers a number of operational considerations recommendations.
+This document offers a number of operational considerations recommendations for operating this online presence.
 
 The first aspect is the device identity in the form of an {{ieee802-1AR}}
 certificate that is installed at manufacturing time in the device.
@@ -159,49 +159,44 @@ The MASA is a public facing web system.  It will be subject to network load from
 legitimate users when a network is bootstrapped for the first time.
 The legitimate load will be proportional to sales.
 
-The MASA will also be subject to a malicious load: a way to deflect
-unwanted users from the application framework backend is to require TLS Client Certificates for  all connections.
+The MASA will also be subject to a malicious load.
+
+## Deflecting unwanted TLS traffic with Client Certificates
+
+One way to deflect unwanted users from the application framework backend is to require TLS Client Certificates for  all connections.
+As described in {{Section 5.5.4 of -BRSKI}}, the Registrar may be authenticated with a TLS Client Certificate.
+
 This offloads much of the defense to what is typically a hardware TLS termination system.
-This can be effective even if the hardware is unable to validate the TLS Client Certificate is not validated.
-This increases the effort requires for attackers, and if they repeat the same certificate then it becomes easier to reject such attackers earlier.
-The use of this certificate forces attackers to generate new key pairs and certificates each time.
-The accompanying document {{I-D.richardson-anima-registrar-considerations}} recommends in section
-5.2.1 recommends the use of a public anchor, or an anchor that is known to the MASA.
+This can be effective even if the hardware is unable to do the actual validation of the TLS Client Certificate, as validation of the certificate occurs prior to any communication with the application server.
+
+This increases the effort requires for attackers, and if they repeat the same certificate then it becomes easier to reject such attackers if a list of invalid/unwanted clients is cached.
+
+The use of a client certificate forces attackers to generate new key pairs and certificates for each attack.
+
+## Web framework architecture
 
 Web framework three-tier mechanisms are a very common architecture.
 See {{threetier}} for an overview.
 There are Internet scale frameworks exist for Ruby (RubyOnRails), Python (Django), Java (J2EE),  GO, PHP and others.
 The methods of deploying them and dealing with expected scale are common in most enterprise IT departments.
 
-Consideration should be made to deploying the presentation layer into
-multiple data centers in order to provide resiliency against distributed
-denial of service (DDoS) attacks that affect all tenants of that data
-center.
+Consideration should be made to deploying the presentation layer into multiple data centers in order to provide resiliency against distributed denial of service (DDoS) attacks that affect all tenants of that data center.
 
-Consideration should also be given to the use of a cloud front end to mitigate
-attacks, however, such a system needs to be able to securely transmit the TLS
-Client Certificates, if the MASA wants to identify Registrars at the TLS
-connection time.
+Consideration should also be given to the use of a cloud front end to mitigate attacks, however, such a system needs to be able to securely transmit the TLS Client Certificates, if the MASA wants to identify Registrars at the TLS connection time.
 
-The middle (application) tier needs to be scalable, but it is unlikely that
-it needs to scale very much on a per-minute or even per-hour basis.
-It is probably easier and more reliable to have application tiers do database
-operations across the Internet or via VPN to a single location database
-cluster than it is to handle asynchronous database operations resulting from
-geographically dispersed multi-master database systems.
+The middle (application) tier needs to be scalable, but it is unlikely that it needs to scale very much on a per-minute or even per-hour basis.
+It is probably easier and more reliable to have application tiers do database operations across the Internet or via VPN to a single location database cluster than it is to handle asynchronous database operations resulting from geographically dispersed multi-master database systems.
 
 But, these are local design decisions which web deployment make on a regular basis.
+The MASA functionality is not different than other public facing systems.
 
-The assets tables that the MASA needs scale linearly with the number of products sold.
+The database tables that the MASA uses scale linearly with the number of products sold,
+but as they are mostly read-only, they could be easily replicated in a read-only manner from a sales database.
 
-Many columns could be replicated in a read-only manner from a sales database.
-
-Direct integration with a sales system could be considered, but would involve
-a more significant security impact analysis.
+Direct integration with a sales system could be considered, but would involve a more significant security impact analysis, so a process where the sales data is extracted to a less sensitive system is RECOMMENDED.
 
 In any case, the manufacturer SHOULD plan for a situation where the manufacturer is no longer able or interested in running the Authority: this does not have to an unhappy situation!
-While the case of the manufacturer going out of business is discussed in {{escrow}},
-there are more happy events which should be prepared for.
+While the case of the manufacturer going out of business is discussed in {{escrow}}, there are more happy events which should be prepared for.
 For instance, if a manufacturer goes through a merge or acquisition and it makes sense to consolidate the Signing Authority in another part of the organization.
 
 Business continuity plan should include backing up the voucher signing keys.
@@ -212,8 +207,7 @@ The document {{I-D.richardson-t2trg-idevid-considerations}} can provide some com
 
 The trust anchors needs to validate {{RFC8366}} vouchers will typically be part of the firmware loaded inot the devie firmware.
 
-There are many models to manage these trust anchors, but in order having only a single
-key, a PKI infrastructure is appropriate, but not required.
+There are many models to manage these trust anchors, but in order having only a single key, a PKI infrastructure is appropriate, but not required.
 
 On constrained devices without code space to parse and validate a public key certificate chain require different considerations, a single key may be necessary.
 This document does not (yet) provide appropriate considerations for that case.
@@ -222,10 +216,18 @@ What follows are a number of ways to construct a resilient PKI to sign vouchers.
 
 ## Self-contained multi-product MASA, no PKI
 
+The simplest situation is to create a self-signed End Entity certificate.
+That is, a public/private key pair.
+The certificate/public key is embedded in the products to validate vouchers, and the private part is kept online to sign vouchers.
+
+This situation has very low security against theft of a key from the MASA.
+Such a theft would result in recall of all products that have not yet been onboarded.
+It is very simple to operate.
+
 ## Self-contained multi-product MASA, with one-level PKI
 
 A simple way is to create an new offline certification authority (CA), have it periodically sign a new End-Entity (EE) identity's certificate.
-This End-Entity identity should have an online private key, and use that to sign voucher requests.
+This End-Entity identity has a private key kept online, and it uses that to sign voucher requests.
 Note that the entity used to sign {{RFC8366}} format vouchers does not need to be a certificate authority.
 
 If the public key of this offline CA is then built-in to the firmware of the device,
@@ -235,23 +237,18 @@ There is no requirement for this CA to be signed by any other certification auth
 That is, it may be a root CA.
 There is also no prohibition against it.
 
-If the offline CA signs any other certificates, then it is important that the device know which End-Entity certificates may sign vouchers.
+If this offline CA signs any other certificates, then it is important that the device know which End-Entity certificates may sign vouchers.
 This is an authorization step, and it may be accomplished it a number of ways:
 
 1. the Distinguished Name (DN) of the appropriate End-Entity certificate can be built-in to the firmware
 
 2. a particular policy OID may be included in certificates intended to sign vouchers
 
+A voucher created for one product could be used to sign a voucher for another product.
+This situation is also mitigated by never repeating serialNumbers across product lines.
 
-
-a voucher created for one product could be used to sign a voucher for another
-product. This situation is also mitigated by never repeating serialNumbers across
-product lines.
-
-An End-Entity certificate used to sign the
-voucher is included in the certificate set in the CMS structure that is used to sign the voucher.
-The root CA's trust anchor should *also* be included, even though it is self-signed, as
-this permits auditing elements in a Registrar to validate the End-Entity Certificate.
+An End-Entity certificate used to sign the voucher is included in the certificate set in the CMS structure that is used to sign the voucher.
+The root CA's trust anchor should *also* be included, even though it is self-signed, as this permits auditing elements in a Registrar to validate the End-Entity Certificate.
 
 The inclusion of the full chain also supports a Trust-on-First-Use (TOFU) workflow for the manager of the Registrar: they can see the trust anchor chain and can compare a fingerprint displayed on their screen with one that could be included in packaging or other sales channel information.
 
@@ -260,10 +257,13 @@ Using only the public key enables a MASA architecture to evolve from a single se
 
 ## Self-contained per-product MASA {#perproduct}
 
-A simple enhancement to the previous scenario is to have a unique MASA offline key for each product line.  This has a few advantages:
+A simple enhancement to the previous scenario is to have a unique MASA offline key for each product line.
+This has a few advantages:
 
 * if the private keys are kept separately (under different encryption keys), then compromise of a single product lines MASA does not compromise all products.
+
 * if a product line is sold to another entity, or if it has to go through an escrow process due to the product going out of production, then the process affects only a single product line.
+
 * it is safe to have serialNumber duplicated among different product lines since a voucher for one product line would not validate on another product line.
 
 The disadvantage is that it requires a private key to be stored per product line, and most large OEMs have many dozens of product lines.
@@ -294,22 +294,27 @@ If the entire PKI operation was outsource, then there would be a benefit for sta
 
 ## Rotating MASA authorization keys {#rotatingkeys}
 
-As a variation of the scenario described in {{perproduct}}, there could be multiple Signing Authority keys per product line.   They could be rotated though in some deterministic order.
-For instance, serial numbers ending in 0 would have MASA key 0 embedded in them at manufacturing time.  The asset database would have to know which key that corresponded to, and it would have to produce vouchers using that key.
+As a variation of the scenario described in {{perproduct}}, there could be multiple Signing Authority keys per product line.
+They could be rotated though in some deterministic order.
+For instance, serial numbers ending in 0 would have MASA key 0 embedded in them at manufacturing time.
+The asset database would have to know which key that corresponded to, and it would have to produce vouchers using that key.
 
 There are significant downsides to this mechanism:
 
 * all of the MASA signing keys need to be online and available in order to respond to any voucher request
+
 * it is necessary to keep track of which device trust which key in the asset database
 
-There is no obvious advantage to doing this if all the MASA signing private keys are kept
-in the same device, under control of the same managers.  But if the keys are spread out to multiple locations and are under control of different people, then there may be some advantage.  A single MASA signing authority key compromise does not cause a recall of all
-devices, but only the portion that had that key embedded in it.
+There is no obvious advantage to doing this if all the MASA signing private keys are kept in the same device, under control of the same managers.
+But if the keys are spread out to multiple locations and are under control of different people, then there may be some advantage.
+A single MASA signing authority key compromise does not cause a recall of all devices, but only the portion that had that key embedded in it.
 
-The relationship between signing key and device could be temporal: all devices made on Tuesday could have the same key, there could be hundreds of keys, each one used only for a few hundred devices.  There are many variations possible.
+The relationship between signing key and device could be temporal: all devices made on Tuesday could have the same key, there could be hundreds of keys, each one used only for a few hundred devices.
+There are many variations possible.
 
-The major advantage comes with the COSE signed constrained-vouchers described in {{-constrainedvoucher}}.  In this context there isn't space in the voucher for a certificate chain, nor is there code space in the device to validate a certificate chain.  The (public) key used to sign is embedded directly in the firmware of each device without the benefit
-of any public key infrastructure to allow indirection of the key.
+The major advantage comes with the COSE signed constrained-vouchers described in {{-constrainedvoucher}}.
+In this context, where there isn't space in the voucher for a certificate chain, nor is there code in the device to validate a certificate chain,  a raw public key can sign the voucher.
+The (public) key used to sign is embedded directly in the firmware of each device without the benefit of any public key infrastructure, which would allow indirection of the key.
 
 # Operational Considerations for Constrained MASA
 
@@ -321,14 +326,14 @@ TBD
 
 # Business Continuity and Escow Considerations {#escrow}
 
-A number of jurisdictions have legal requirements for businesses to have contingency plans in order to continue operating after an incident or disaster.  Specifications include {{iso22301_2019}}, but the problem of continuity goes back over 40 years.
+A number of jurisdictions have legal requirements for businesses to have contingency plans in order to continue operating after an incident or disaster.
+Specifications include {{iso22301_2019}}, but the problem of continuity goes back over 40 years.
 
 The {{holman2012}} document defined an eight tier process to understand how data would be backed up.
 Tier 0 is "no off-site data", and would be inappropriate for the MASA's signing key.
 The question as to how much delay (downtime) is tolerable during a disaster for activating new devices.
 The consideration should depend upon the type of the device, and what kind of disasters are being planned for.
-Given current technologies for replicating databases online, a tier-4 ("Point-in-time copies")
-or better solution may be quite economically deployed.
+Given current technologies for replicating databases online, a tier-4 ("Point-in-time copies") or better solution may be quite economically deployed.
 
 A key aspect of the MASA is that it was designed as a component that can be outsourced to a third party, and this third party can leverage economies of scale to provide more resilient systems at much lower costs.
 
