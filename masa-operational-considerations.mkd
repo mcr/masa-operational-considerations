@@ -26,7 +26,6 @@ author:
 
 normative:
   RFC8366:
-  I-D.richardson-t2trg-idevid-considerations:
   I-D.ietf-anima-constrained-voucher: constrainedvoucher
   RFC8995: BRSKI
   I-D.richardson-anima-registrar-considerations:
@@ -135,7 +134,7 @@ This document offers a number of operational considerations recommendations for 
 
 The first aspect is the device identity in the form of an {{ieee802-1AR}}
 certificate that is installed at manufacturing time in the device.
-Some of the background for the operational considerations of building this public key infrastructure is described in {{I-D.richardson-t2trg-idevid-considerations}}.
+Some of the background for the operational considerations of building this public key infrastructure is described in {{!I-D.irtf-t2trg-taxonomy-manufacturer-anchors}}.
 
 The second aspect is the use of the Manufacturer Authorized Signing Authority
 (MASA), as described in {{-BRSKI}} section 2.5.4.   The device needs to have
@@ -168,6 +167,8 @@ As described in Section 5.5.4 of {{-BRSKI}}, the Registrar may be authenticated 
 
 This offloads much of the defense to what is typically a hardware TLS termination system.
 This can be effective even if the hardware is unable to do the actual validation of the TLS Client Certificate, as validation of the certificate occurs prior to any communication with the application server.
+
+{{!I-D.ietf-httpbis-client-cert-field}} is a critical addition to any use of TLS offload, as the certificate used needs to be communicated to the application framework for detailed authorization.
 
 This increases the effort requires for attackers, and if they repeat the same certificate then it becomes easier to reject such attackers if a list of invalid/unwanted clients is cached.
 
