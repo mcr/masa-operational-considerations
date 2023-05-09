@@ -204,7 +204,7 @@ Business continuity plan should include backing up the voucher signing keys.
 This may involve multiple Hardware Security Modules, and secret splitting mechanisms
 SHOULD be employed.
 For large value items, customers are going to need to review the plan as part of their contingency audits.
-The document {{I-D.richardson-t2trg-idevid-considerations}} can provide some common basis for this kind of evaluation.
+The document {{!I-D.irtf-t2trg-taxonomy-manufacturer-anchors}} can provide some common basis for this kind of evaluation.
 
 The trust anchors needs to validate {{RFC8366}} vouchers will typically be part of the firmware loaded inot the devie firmware.
 
