@@ -1,7 +1,7 @@
 ---
 title: Operational Considerations for Voucher infrastructure for BRSKI MASA
 abbrev: MASA Considerations
-docname: draft-richardson-anima-masa-considerations-08
+docname: draft-ietf-anima-masa-considerations-00
 
 ipr: trust200902
 area: Internet
