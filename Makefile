@@ -18,7 +18,7 @@ ${DRAFT}-${VERSION}.txt: ${DRAFT}.txt
 
 submit: ${DRAFT}.xml
 	xml2rfc --v2v3 ${DRAFT}.xml
-	curl -S -F "user=mcr+ietf@sandelman.ca" -F "xml=@${DRAFT}.v2v3.xml" https://datatracker.ietf.org/api/submit
+	curl -s -F "user=mcr+ietf@sandelman.ca" ${REPLACES} -F "xml=@${DRAFT}.xml" https://datatracker.ietf.org/api/submission | jq
 
 version:
 	echo Version: ${VERSION}
